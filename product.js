@@ -47,6 +47,14 @@ if (document.body.classList.contains('product-detail-page')) {
             originalPrice: '55€',
             description: 'Ce t-shirt noir de la collection OSLAN pour homme incarne la force et le style. Confectionné avec des matériaux de haute qualité, il offre un confort optimal tout au long de la journée. Coupe ajustée moderne pour un look streetwear affirmé.',
             images: ['assets/tshirt-noir-homme.jpg', 'assets/carousel-3.jpg', 'assets/hero.jpg']
+        },
+        'tshirt-blanc-femme': {
+            title: 'T-shirt Signature Oslan Blanc',
+            subtitle: 'Collection Femme - Élégance et pureté.',
+            currentPrice: '45€',
+            originalPrice: '55€',
+            description: 'Ce t-shirt blanc de la collection OSLAN pour femme incarne l\'élégance et la pureté. Fabriqué avec du coton premium 100% biologique, il offre une coupe flatteuse et un confort exceptionnel. Parfait pour un look casual chic ou streetwear raffiné.',
+            images: ['assets/tshirt-blanc-femme.jpg', 'assets/tshirt-blanc.jpg', 'assets/carousel-1.jpg']
         }
     };
 
