@@ -935,8 +935,7 @@ ul {
 
 /* Promo Section */
 .promo-section {
-    margin-top: 8px;
-    /* Reduced from 16px as requested */
+    margin-top: 5px;
     padding: var(--spacing-md);
     background-color: var(--color-bg);
     border-radius: var(--border-radius-md);
@@ -958,7 +957,8 @@ ul {
 .cart-main {
     flex: 1;
     padding: var(--spacing-md);
-    padding-bottom: 100px;
+    padding-bottom: 160px;
+    /* Increased to ensure everything is scrollable above the fixed button */
     overflow-y: auto;
 }
 
@@ -1019,9 +1019,8 @@ ul {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    /* Primary spacing method */
-    padding: 16px 8px 140px 8px;
-    /* Bottom padding for checkout button */
+    padding: 16px 8px 0 8px;
+    /* Removed 140px bottom padding */
 }
 
 .cart-item {
