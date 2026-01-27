@@ -308,9 +308,19 @@ if (document.body.classList.contains('product-detail-page')) {
     }
 
     // ===== Cart Storage Functions =====
+    function safeJSONParse(str, fallback) {
+        try {
+            return str ? JSON.parse(str) : fallback;
+        } catch (e) {
+            console.error('Error parsing JSON from localStorage:', e);
+            return fallback;
+        }
+    }
+
     function getCart() {
         const cart = localStorage.getItem('cart');
-        return cart ? JSON.parse(cart) : [];
+        const parsed = safeJSONParse(cart, []);
+        return Array.isArray(parsed) ? parsed : [];
     }
 
     function saveCart(cart) {

@@ -8,52 +8,67 @@ const cartCount = document.getElementById('cartCount');
 
 // ===== Sidebar Toggle =====
 function openSidebar() {
-    sidebar.classList.add('active');
-    sidebarOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (sidebar && sidebarOverlay) {
+        sidebar.classList.add('active');
+        sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeSidebar() {
-    sidebar.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
-    document.body.style.overflow = '';
+    if (sidebar && sidebarOverlay) {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
-menuBtn.addEventListener('click', openSidebar);
-closeBtn.addEventListener('click', closeSidebar);
-sidebarOverlay.addEventListener('click', closeSidebar);
+if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
 // Close sidebar on escape key
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
         closeSidebar();
     }
 });
 
 // ===== Favorite Toggle =====
-favoriteButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        btn.classList.toggle('active');
+if (favoriteButtons.length > 0) {
+    favoriteButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            btn.classList.toggle('active');
 
-        // Add heart animation
-        if (btn.classList.contains('active')) {
-            btn.style.transform = 'scale(1.2)';
-            setTimeout(() => {
-                btn.style.transform = 'scale(1)';
-            }, 150);
-        }
+            // Add heart animation
+            if (btn.classList.contains('active')) {
+                btn.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 150);
+            }
+        });
     });
-});
+}
 
 
 // ===== Cart Management =====
+function safeJSONParse(str, fallback) {
+    try {
+        return str ? JSON.parse(str) : fallback;
+    } catch (e) {
+        console.error('Error parsing JSON from localStorage:', e);
+        return fallback;
+    }
+}
+
 function getCartCount() {
     const cart = localStorage.getItem('cart');
     if (cart) {
-        const items = JSON.parse(cart);
-        return items.reduce((sum, item) => sum + item.quantity, 0);
+        const items = safeJSONParse(cart, []);
+        return Array.isArray(items) ? items.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
     }
     return parseInt(localStorage.getItem('cartItems') || '0');
 }
