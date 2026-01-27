@@ -447,6 +447,11 @@ ul {
     display: flex;
     gap: var(--spacing-md);
     padding: 0 var(--spacing-md);
+    padding-right: calc(25vw - var(--spacing-md));
+}
+
+.carousel-slide:last-child {
+    margin-right: var(--spacing-md);
 }
 
 .carousel-slide {
