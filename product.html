@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du Produit - OSLAN</title>
+    <meta name="description" content="OSLAN - Détails du produit. Découvrez notre collection streetwear premium.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="product-detail-page">
+    <!-- Header -->
+    <header class="header product-header">
+        <button class="back-btn" id="backBtn" aria-label="Retour">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+        </button>
+
+        <h1 class="page-title">Détails du Produit</h1>
+
+        <button class="favorite-btn-header" id="favoriteBtn" aria-label="Ajouter aux favoris">
+            <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="product-main">
+        <!-- Product Gallery -->
+        <section class="product-gallery">
+            <div class="gallery-container" id="galleryContainer">
+                <div class="gallery-track" id="galleryTrack">
+                    <div class="gallery-slide">
+                        <img src="" alt="Produit - Vue 1" id="productImg1">
+                    </div>
+                    <div class="gallery-slide">
+                        <img src="" alt="Produit - Vue 2" id="productImg2">
+                    </div>
+                    <div class="gallery-slide">
+                        <img src="" alt="Produit - Vue 3" id="productImg3">
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-dots" id="galleryDots">
+                <span class="dot active" data-index="0"></span>
+                <span class="dot" data-index="1"></span>
+                <span class="dot" data-index="2"></span>
+            </div>
+        </section>
+
+        <!-- Product Info -->
+        <section class="product-info-detail">
+            <div class="product-title-price">
+                <div class="product-title-section">
+                    <h2 class="product-title" id="productTitle">T-shirt Signature Oslan</h2>
+                    <p class="product-subtitle" id="productSubtitle">Style élégant, qualité premium et confort
+                        intemporel.</p>
+                </div>
+                <div class="product-price-section">
+                    <span class="current-price" id="currentPrice">45€</span>
+                    <span class="original-price" id="originalPrice">55€</span>
+                </div>
+            </div>
+
+            <!-- Size Selection -->
+            <div class="size-selection">
+                <h3 class="size-title">Sélectionner la taille</h3>
+                <div class="size-options" id="sizeOptions">
+                    <button class="size-btn" data-size="XS">XS</button>
+                    <button class="size-btn" data-size="S">S</button>
+                    <button class="size-btn active" data-size="M">M</button>
+                    <button class="size-btn" data-size="L">L</button>
+                    <button class="size-btn" data-size="XL">XL</button>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="product-description-section">
+                <h3 class="description-title">Description</h3>
+                <p class="description-text" id="descriptionText">
+                    Ce t-shirt de la collection OSLAN offre un style élégant et sophistiqué pour toutes les occasions.
+                    Confectionné avec des matériaux premium, il allie confort et durabilité.
+                    Coupe moderne et ajustée, parfait pour un look streetwear raffiné.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button class="btn-secondary" id="buyNowBtn">Acheter</button>
+        <button class="btn-primary" id="addToCartBtn">Ajouter au panier</button>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="product.js"></script>
+</body>
+
+</html>
