@@ -999,8 +999,8 @@ ul {
 .cart-items {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-xs);
+    gap: 24px;
+    padding: 8px;
 }
 
 .cart-item {
