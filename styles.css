@@ -438,9 +438,7 @@ ul {
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-padding-left: var(--spacing-lg);
-    /* Snap alignment start */
-    scroll-padding-right: var(--spacing-lg);
-    /* Snap alignment end */
+    /* Important for snap alignment with padding */
 }
 
 .carousel-container::-webkit-scrollbar {
@@ -451,7 +449,7 @@ ul {
     display: flex;
     gap: var(--spacing-md);
     padding: 0 var(--spacing-lg);
-    /* Padding creates scroll space */
+    /* Padding on both sides */
 }
 
 /* Explicit margins help ensure scroll space on all browsers */
@@ -460,19 +458,7 @@ ul {
 }
 
 .carousel-slide:last-child {
-    margin-right: var(--spacing-lg);
-    /* Force extra right margin */
-    /* Note: padding-right on track + margin-right might double it, but ensures at least one works. 
-       Actually, padding on track is often ignored for scroll end in flexbox. 
-       Let's use padding-left on track for start, and margin-right on last-child for end.
-    */
-}
-
-/* Let's refine the track padding to be safe */
-.carousel-track {
-    padding-left: var(--spacing-lg);
-    padding-right: 0;
-    /* Move right spacing to last-child margin */
+    margin-right: 0;
 }
 
 .carousel-slide {
