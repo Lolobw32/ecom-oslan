@@ -256,7 +256,7 @@ if (document.body.classList.contains('product-detail-page')) {
     function createConfetti(button) {
         // Site colors: black and white only
         const colors = ['#1a1a1a', '#333333', '#666666', '#999999', '#ffffff'];
-        const confettiCount = 40;
+        const confettiCount = 60; // More confetti
 
         for (let i = 0; i < confettiCount; i++) {
             const confetti = document.createElement('div');
@@ -360,8 +360,11 @@ if (document.body.classList.contains('product-detail-page')) {
             // Create confetti explosion
             createConfetti(addToCartBtn);
 
-            // Animation feedback with checkmark (darker green)
-            addToCartBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            // Set flag for cart page to show confetti
+            sessionStorage.setItem('showCartConfetti', 'true');
+
+            // Animation feedback with text and checkmark (darker green)
+            addToCartBtn.innerHTML = `Ajouté <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
             addToCartBtn.style.backgroundColor = '#1e7e34';
 
             setTimeout(() => {

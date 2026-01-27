@@ -256,9 +256,76 @@ if (checkoutBtn) {
     });
 }
 
+// ===== Confetti Animation (same as product.js) =====
+function createCartConfetti() {
+    // Site colors: black and white only
+    const colors = ['#1a1a1a', '#333333', '#666666', '#999999', '#ffffff'];
+    const confettiCount = 60;
+
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+
+        // Start from random position at top of screen
+        const startX = Math.random() * window.innerWidth;
+
+        confetti.style.cssText = `
+            position: fixed;
+            width: ${Math.random() * 10 + 5}px;
+            height: ${Math.random() * 10 + 5}px;
+            background-color: ${colors[Math.floor(Math.random() * colors.length)]};
+            left: ${startX}px;
+            top: -20px;
+            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+            pointer-events: none;
+            z-index: 9999;
+        `;
+        document.body.appendChild(confetti);
+
+        // Fall from top with slight horizontal movement
+        const horizontalSpeed = Math.random() * 4 - 2;
+        const fallSpeed = Math.random() * 3 + 4;
+        let y = -20;
+        let x = 0;
+        let opacity = 1;
+        let rotation = 0;
+        const rotationSpeed = Math.random() * 10 - 5;
+
+        function animate() {
+            y += fallSpeed;
+            x += horizontalSpeed;
+            opacity -= 0.008;
+            rotation += rotationSpeed;
+
+            confetti.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+            confetti.style.opacity = opacity;
+
+            if (opacity > 0 && y < window.innerHeight + 50) {
+                requestAnimationFrame(animate);
+            } else {
+                confetti.remove();
+            }
+        }
+
+        setTimeout(() => requestAnimationFrame(animate), Math.random() * 500);
+    }
+}
+
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
     renderCart();
     updateCartCount();
+
+    // Check if we should show confetti (new product was added)
+    if (sessionStorage.getItem('showCartConfetti') === 'true') {
+        // Clear the flag so it doesn't show again on page refresh
+        sessionStorage.removeItem('showCartConfetti');
+
+        // Show confetti with a small delay for better effect
+        setTimeout(() => {
+            createCartConfetti();
+        }, 300);
+    }
+
     console.log('Cart page loaded! 🛒');
 });
