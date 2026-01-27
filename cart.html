@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Panier - OSLAN</title>
+    <meta name="description" content="OSLAN - Votre panier d'achat.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="cart-page">
+    <!-- Header -->
+    <header class="header cart-header">
+        <button class="back-btn" id="backBtn" aria-label="Retour">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+        </button>
+
+        <h1 class="page-title">Mon Panier</h1>
+
+        <div class="cart-count-header">
+            <span id="cartCountHeader">0</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="cart-main">
+        <!-- Empty Cart Message -->
+        <div class="empty-cart" id="emptyCart">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                <path d="M6 6h15l-1.5 9h-12z" />
+                <circle cx="9" cy="20" r="1" />
+                <circle cx="18" cy="20" r="1" />
+                <path d="M6 6L5 3H2" />
+            </svg>
+            <h2>Votre panier est vide</h2>
+            <p>Découvrez nos produits et ajoutez-les au panier</p>
+            <a href="index.html" class="btn-primary">Voir les produits</a>
+        </div>
+
+        <!-- Cart Items List -->
+        <div class="cart-items" id="cartItems">
+            <!-- Items will be dynamically inserted here -->
+        </div>
+
+        <!-- Promo Code Section -->
+        <div class="promo-section" id="promoSection">
+            <div class="promo-input-wrapper">
+                <input type="text" id="promoInput" placeholder="Code promo" class="promo-input">
+                <button class="promo-btn" id="promoBtn">Appliquer</button>
+            </div>
+            <p class="promo-message" id="promoMessage"></p>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary" id="orderSummary">
+            <div class="summary-row">
+                <span>Sous-total</span>
+                <span id="subtotal">0€</span>
+            </div>
+            <div class="summary-row">
+                <span>Frais de livraison</span>
+                <span id="shippingFees">Gratuit</span>
+            </div>
+            <div class="summary-row">
+                <span>Livraison</span>
+                <span class="delivery-option">Standard (Gratuit)</span>
+            </div>
+            <div class="summary-row total-row">
+                <span>Total</span>
+                <span id="totalPrice">0€</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Checkout Button -->
+    <div class="checkout-section" id="checkoutSection">
+        <button class="checkout-btn" id="checkoutBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 6h15l-1.5 9h-12z" />
+                <circle cx="9" cy="20" r="1" />
+                <circle cx="18" cy="20" r="1" />
+                <path d="M6 6L5 3H2" />
+            </svg>
+            <span id="checkoutTotal">0€</span>
+        </button>
+    </div>
+
+    <script src="cart.js"></script>
+</body>
+
+</html>

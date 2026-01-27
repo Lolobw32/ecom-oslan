@@ -36,7 +36,7 @@ favoriteButtons.forEach(btn => {
         e.preventDefault();
         e.stopPropagation();
         btn.classList.toggle('active');
-        
+
         // Add heart animation
         if (btn.classList.contains('active')) {
             btn.style.transform = 'scale(1.2)';
@@ -48,32 +48,36 @@ favoriteButtons.forEach(btn => {
 });
 
 // ===== Cart Management =====
-let cartItems = 0;
-
-function updateCartCount() {
-    cartCount.textContent = cartItems;
-    if (cartItems > 0) {
-        cartCount.classList.add('active');
-    } else {
-        cartCount.classList.remove('active');
+function getCartCount() {
+    const cart = localStorage.getItem('cart');
+    if (cart) {
+        const items = JSON.parse(cart);
+        return items.reduce((sum, item) => sum + item.quantity, 0);
     }
+    return parseInt(localStorage.getItem('cartItems') || '0');
 }
 
-// Example: Add to cart functionality (can be expanded)
-function addToCart() {
-    cartItems++;
-    updateCartCount();
+function updateCartCount() {
+    const count = getCartCount();
+    if (cartCount) {
+        cartCount.textContent = count;
+        if (count > 0) {
+            cartCount.classList.add('active');
+        } else {
+            cartCount.classList.remove('active');
+        }
+    }
 }
 
 // ===== Smooth Scroll for Anchor Links =====
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
+    anchor.addEventListener('click', function (e) {
         const targetId = this.getAttribute('href');
         if (targetId === '#') return;
-        
+
         e.preventDefault();
         const targetElement = document.querySelector(targetId);
-        
+
         if (targetElement) {
             closeSidebar();
             setTimeout(() => {
@@ -125,12 +129,12 @@ document.addEventListener('touchend', (e) => {
 function handleSwipe() {
     const swipeThreshold = 50;
     const diff = touchEndX - touchStartX;
-    
+
     // Swipe right to open sidebar (from left edge)
     if (diff > swipeThreshold && touchStartX < 50) {
         openSidebar();
     }
-    
+
     // Swipe left to close sidebar
     if (diff < -swipeThreshold && sidebar.classList.contains('active')) {
         closeSidebar();
@@ -141,6 +145,6 @@ function handleSwipe() {
 document.addEventListener('DOMContentLoaded', () => {
     // Initial cart count update
     updateCartCount();
-    
+
     console.log('OSLAN E-commerce site loaded successfully! 🚀');
 });
