@@ -437,6 +437,8 @@ ul {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    scroll-padding-left: var(--spacing-lg);
+    /* Important for snap alignment with padding */
 }
 
 .carousel-container::-webkit-scrollbar {
@@ -446,15 +448,17 @@ ul {
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
-    padding-right: var(--spacing-lg);
+    padding: 0 var(--spacing-lg);
+    /* Padding on both sides */
 }
 
+/* Removed individual margins as padding on track handles it */
 .carousel-slide:first-child {
-    margin-left: var(--spacing-lg);
+    margin-left: 0;
 }
 
 .carousel-slide:last-child {
-    margin-right: var(--spacing-lg);
+    margin-right: 0;
 }
 
 .carousel-slide {
