@@ -916,18 +916,40 @@ ul {
     font-size: var(--font-size-xl);
     font-weight: 600;
     color: var(--color-text);
+    margin-top: var(--spacing-md);
 }
 
 .empty-cart p {
     color: var(--color-text-light);
     font-size: var(--font-size-sm);
+    max-width: 250px;
 }
 
 .empty-cart .btn-primary {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-xl);
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-lg);
     text-decoration: none;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    background-color: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.empty-cart .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.empty-cart .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Cart Items */
