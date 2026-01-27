@@ -935,7 +935,7 @@ ul {
 
 /* Promo Section */
 .promo-section {
-    margin-top: 5px;
+    margin-top: 16px;
     padding: var(--spacing-md);
     background-color: var(--color-bg);
     border-radius: var(--border-radius-md);
