@@ -58,7 +58,40 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    animation: pageEntry 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+/* ===== Page Transitions ===== */
+@keyframes pageEntry {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-exit {
+    animation: pageExit 0.4s ease-in forwards;
+    pointer-events: none;
+    /* Prevent clicks during exit */
+}
+
+@keyframes pageExit {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
 
 img {
     max-width: 100%;
@@ -336,7 +369,7 @@ ul {
     transform: scale(0.98);
 }
 
-.favorite-btn {
+.quick-add-btn {
     position: absolute;
     top: var(--spacing-sm);
     left: var(--spacing-sm);
@@ -347,24 +380,20 @@ ul {
     align-items: center;
     justify-content: center;
     background-color: var(--color-bg);
+    border: 2px solid var(--color-text);
     border-radius: 50%;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: var(--transition-fast);
+    color: var(--color-text);
 }
 
-.favorite-btn:active {
+.quick-add-btn:active {
     transform: scale(0.9);
 }
 
-.heart-icon {
-    color: var(--color-heart);
-    transition: var(--transition-fast);
-}
-
-.favorite-btn.active .heart-icon {
-    fill: var(--color-heart-active);
-    stroke: var(--color-heart-active);
-    color: var(--color-heart-active);
+.quick-add-btn:hover {
+    background-color: var(--color-text);
+    color: var(--color-bg);
 }
 
 .product-link {
