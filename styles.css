@@ -813,6 +813,60 @@ ul {
     opacity: 0.9;
 }
 
+/* Page Transitions */
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+.product-detail-page {
+    animation: fadeSlideIn 0.35s ease-out forwards;
+}
+
+.product-detail-page.page-exit {
+    animation: fadeSlideOut 0.25s ease-in forwards;
+}
+
+/* Gallery Improvements */
+.gallery-container {
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: pan-y pinch-zoom;
+}
+
+.gallery-container:active {
+    cursor: grabbing;
+}
+
+.gallery-track {
+    will-change: transform;
+}
+
+.gallery-slide img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
 /* ===== Responsive ===== */
 @media (min-width: 480px) {
     .hero {

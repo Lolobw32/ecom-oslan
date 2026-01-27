@@ -102,9 +102,21 @@ if (document.body.classList.contains('product-detail-page')) {
     const slides = galleryTrack ? galleryTrack.querySelectorAll('.gallery-slide') : [];
     const dots = galleryDots ? galleryDots.querySelectorAll('.dot') : [];
     const totalSlides = slides.length;
+    const galleryContainer = document.getElementById('galleryContainer');
 
-    function updateGallery() {
+    // Swipe state
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let translateX = 0;
+
+    function updateGallery(animate = true) {
         if (galleryTrack) {
+            if (animate) {
+                galleryTrack.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            } else {
+                galleryTrack.style.transition = 'none';
+            }
             galleryTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
 
@@ -113,11 +125,11 @@ if (document.body.classList.contains('product-detail-page')) {
         });
     }
 
-    function goToSlide(index) {
+    function goToSlide(index, animate = true) {
         currentSlide = index;
-        if (currentSlide < 0) currentSlide = totalSlides - 1;
-        if (currentSlide >= totalSlides) currentSlide = 0;
-        updateGallery();
+        if (currentSlide < 0) currentSlide = 0;
+        if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+        updateGallery(animate);
     }
 
     // Dot navigation
@@ -128,32 +140,96 @@ if (document.body.classList.contains('product-detail-page')) {
         });
     });
 
-    // Touch gestures for gallery
-    let galleryTouchStartX = 0;
-    let galleryTouchEndX = 0;
+    // Touch gestures for gallery - improved with real-time tracking
+    if (galleryContainer) {
+        const getContainerWidth = () => galleryContainer.offsetWidth;
 
-    if (galleryTrack) {
-        galleryTrack.addEventListener('touchstart', (e) => {
-            galleryTouchStartX = e.changedTouches[0].screenX;
+        galleryContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            translateX = -currentSlide * 100;
+            galleryTrack.style.transition = 'none';
         }, { passive: true });
 
-        galleryTrack.addEventListener('touchend', (e) => {
-            galleryTouchEndX = e.changedTouches[0].screenX;
-            handleGallerySwipe();
+        galleryContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+
+            currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            const containerWidth = getContainerWidth();
+            const percentMove = (diff / containerWidth) * 100;
+
+            // Apply real-time transform following finger
+            galleryTrack.style.transform = `translateX(${translateX + percentMove}%)`;
         }, { passive: true });
-    }
 
-    function handleGallerySwipe() {
-        const swipeThreshold = 50;
-        const diff = galleryTouchEndX - galleryTouchStartX;
+        galleryContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
 
-        if (diff < -swipeThreshold) {
-            // Swipe left - next slide
-            goToSlide(currentSlide + 1);
-        } else if (diff > swipeThreshold) {
-            // Swipe right - previous slide
-            goToSlide(currentSlide - 1);
-        }
+            const endX = e.changedTouches[0].clientX;
+            const diff = endX - startX;
+            const containerWidth = getContainerWidth();
+            const swipeThreshold = containerWidth * 0.15; // 15% of width
+
+            if (diff < -swipeThreshold && currentSlide < totalSlides - 1) {
+                // Swipe left - next slide
+                goToSlide(currentSlide + 1);
+            } else if (diff > swipeThreshold && currentSlide > 0) {
+                // Swipe right - previous slide
+                goToSlide(currentSlide - 1);
+            } else {
+                // Snap back to current slide
+                goToSlide(currentSlide);
+            }
+        }, { passive: true });
+
+        // Mouse support for desktop testing
+        galleryContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            translateX = -currentSlide * 100;
+            galleryTrack.style.transition = 'none';
+            galleryContainer.style.cursor = 'grabbing';
+        });
+
+        galleryContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            currentX = e.clientX;
+            const diff = currentX - startX;
+            const containerWidth = getContainerWidth();
+            const percentMove = (diff / containerWidth) * 100;
+
+            galleryTrack.style.transform = `translateX(${translateX + percentMove}%)`;
+        });
+
+        galleryContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            galleryContainer.style.cursor = 'grab';
+
+            const diff = e.clientX - startX;
+            const containerWidth = getContainerWidth();
+            const swipeThreshold = containerWidth * 0.15;
+
+            if (diff < -swipeThreshold && currentSlide < totalSlides - 1) {
+                goToSlide(currentSlide + 1);
+            } else if (diff > swipeThreshold && currentSlide > 0) {
+                goToSlide(currentSlide - 1);
+            } else {
+                goToSlide(currentSlide);
+            }
+        });
+
+        galleryContainer.addEventListener('mouseleave', () => {
+            if (isDragging) {
+                isDragging = false;
+                galleryContainer.style.cursor = 'grab';
+                goToSlide(currentSlide);
+            }
+        });
     }
 
     // ===== Size Selection =====
