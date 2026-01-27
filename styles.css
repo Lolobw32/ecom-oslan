@@ -999,7 +999,7 @@ ul {
 .cart-items {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 48px;
     padding: 8px;
 }
 
