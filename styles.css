@@ -421,6 +421,69 @@ ul {
     letter-spacing: 1px;
 }
 
+/* ===== Carousel Section ===== */
+.carousel-section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--color-bg);
+    overflow: hidden;
+}
+
+.carousel-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.carousel-container::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-track {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-md);
+}
+
+.carousel-slide {
+    flex: 0 0 auto;
+    width: 75vw;
+    max-width: 320px;
+    scroll-snap-align: start;
+}
+
+.carousel-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    background-color: var(--color-card-bg);
+}
+
+.carousel-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-slow);
+}
+
+.carousel-slide:hover .carousel-image img {
+    transform: scale(1.05);
+}
+
+.carousel-label {
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* ===== Footer ===== */
 .footer {
     background-color: var(--color-promo-bg);
