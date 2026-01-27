@@ -3,6 +3,7 @@ const menuBtn = document.getElementById('menuBtn');
 const closeBtn = document.getElementById('closeBtn');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
+const favoriteButtons = document.querySelectorAll('.favorite-btn');
 const cartCount = document.getElementById('cartCount');
 
 // ===== Sidebar Toggle =====
@@ -29,55 +30,23 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ===== Quick Add to Cart =====
-const quickAddButtons = document.querySelectorAll('.quick-add-btn');
-
-quickAddButtons.forEach(btn => {
+// ===== Favorite Toggle =====
+favoriteButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        btn.classList.toggle('active');
 
-        const productId = btn.dataset.product;
-        if (!productId) return;
-
-        // Get cart from localStorage
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-        // Check if product already exists
-        const existingIndex = cart.findIndex(item => item.productId === productId && item.size === 'M');
-
-        if (existingIndex >= 0) {
-            cart[existingIndex].quantity++;
-        } else {
-            cart.push({
-                productId: productId,
-                size: 'M', // Default size
-                quantity: 1
-            });
+        // Add heart animation
+        if (btn.classList.contains('active')) {
+            btn.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 150);
         }
-
-        // Save cart
-        localStorage.setItem('cart', JSON.stringify(cart));
-
-        // Set flag for cart page confetti
-        sessionStorage.setItem('showCartConfetti', 'true');
-
-        // Update cart count
-        updateCartCount();
-
-        // Visual feedback - change + to checkmark
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        btn.style.backgroundColor = '#1e7e34';
-        btn.style.borderColor = '#1e7e34';
-
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.style.backgroundColor = '';
-            btn.style.borderColor = '';
-        }, 1200);
     });
 });
+
 
 // ===== Cart Management =====
 function getCartCount() {
@@ -203,28 +172,3 @@ window.addEventListener('storage', (event) => {
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     updateCartCount();
 }
-
-// ===== Page Exit Transitions =====
-document.addEventListener('DOMContentLoaded', () => {
-    document.body.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-
-        // Check if it's a link to an internal page and not an anchor link or new tab
-        if (link && link.href && link.href.startsWith(window.location.origin) &&
-            !link.getAttribute('href').startsWith('#') &&
-            link.target !== '_blank' &&
-            !e.ctrlKey && !e.metaKey) {
-
-            e.preventDefault();
-            const targetUrl = link.href;
-
-            // Add exit animation class
-            document.body.classList.add('page-exit');
-
-            // Wait for animation then navigate
-            setTimeout(() => {
-                window.location.href = targetUrl;
-            }, 300); // Slightly less than CSS animation (0.4s) for snappier feel
-        }
-    });
-});

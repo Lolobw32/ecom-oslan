@@ -329,26 +329,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('Cart page loaded! 🛒');
 
-    // ===== Page Exit Transitions =====
-    document.body.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-
-        // Check if it's a link to an internal page and not an anchor link or new tab
-        if (link && link.href && link.href.startsWith(window.location.origin) &&
-            !link.getAttribute('href').startsWith('#') &&
-            link.target !== '_blank' &&
-            !e.ctrlKey && !e.metaKey) {
-
-            e.preventDefault();
-            const targetUrl = link.href;
-
-            // Add exit animation class
-            document.body.classList.add('page-exit');
-
-            // Wait for animation then navigate
-            setTimeout(() => {
-                window.location.href = targetUrl;
-            }, 300);
-        }
-    });
 });
