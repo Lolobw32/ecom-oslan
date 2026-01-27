@@ -254,52 +254,56 @@ if (document.body.classList.contains('product-detail-page')) {
 
     // ===== Confetti Animation =====
     function createConfetti(button) {
-        const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#1dd1a1'];
-        const confettiCount = 30;
-        const buttonRect = button.getBoundingClientRect();
+        // Site colors: black and white only
+        const colors = ['#1a1a1a', '#333333', '#666666', '#999999', '#ffffff'];
+        const confettiCount = 40;
 
         for (let i = 0; i < confettiCount; i++) {
             const confetti = document.createElement('div');
             confetti.className = 'confetti';
+
+            // Start from random position at top of screen
+            const startX = Math.random() * window.innerWidth;
+
             confetti.style.cssText = `
                 position: fixed;
-                width: ${Math.random() * 8 + 4}px;
-                height: ${Math.random() * 8 + 4}px;
+                width: ${Math.random() * 10 + 5}px;
+                height: ${Math.random() * 10 + 5}px;
                 background-color: ${colors[Math.floor(Math.random() * colors.length)]};
-                left: ${buttonRect.left + buttonRect.width / 2}px;
-                top: ${buttonRect.top + buttonRect.height / 2}px;
+                left: ${startX}px;
+                top: -20px;
                 border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
                 pointer-events: none;
                 z-index: 9999;
             `;
             document.body.appendChild(confetti);
 
-            const angle = (Math.random() * 360) * (Math.PI / 180);
-            const velocity = Math.random() * 80 + 40;
-            const vx = Math.cos(angle) * velocity;
-            const vy = Math.sin(angle) * velocity - 50;
-
-            let x = 0, y = 0, opacity = 1, rotation = 0;
-            const gravity = 2;
+            // Fall from top with slight horizontal movement
+            const horizontalSpeed = Math.random() * 4 - 2;
+            const fallSpeed = Math.random() * 3 + 4;
+            let y = -20;
+            let x = 0;
+            let opacity = 1;
+            let rotation = 0;
             const rotationSpeed = Math.random() * 10 - 5;
 
             function animate() {
-                x += vx * 0.02;
-                y += vy * 0.02 + gravity * 0.5;
-                opacity -= 0.015;
+                y += fallSpeed;
+                x += horizontalSpeed;
+                opacity -= 0.008;
                 rotation += rotationSpeed;
 
                 confetti.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
                 confetti.style.opacity = opacity;
 
-                if (opacity > 0) {
+                if (opacity > 0 && y < window.innerHeight + 50) {
                     requestAnimationFrame(animate);
                 } else {
                     confetti.remove();
                 }
             }
 
-            setTimeout(() => requestAnimationFrame(animate), Math.random() * 100);
+            setTimeout(() => requestAnimationFrame(animate), Math.random() * 500);
         }
     }
 
@@ -356,9 +360,9 @@ if (document.body.classList.contains('product-detail-page')) {
             // Create confetti explosion
             createConfetti(addToCartBtn);
 
-            // Animation feedback with count
-            addToCartBtn.innerHTML = `Ajouté ! (${totalItems}) 🎉`;
-            addToCartBtn.style.backgroundColor = '#28a745';
+            // Animation feedback with checkmark (darker green)
+            addToCartBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            addToCartBtn.style.backgroundColor = '#1e7e34';
 
             setTimeout(() => {
                 addToCartBtn.innerHTML = 'Ajouter au panier';
