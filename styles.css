@@ -446,12 +446,12 @@ ul {
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
-    padding-left: var(--spacing-md);
-    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
 }
 
 .carousel-slide:last-child {
-    margin-right: var(--spacing-md);
+    margin-right: var(--spacing-lg);
 }
 
 .carousel-slide {
