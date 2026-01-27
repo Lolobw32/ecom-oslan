@@ -437,6 +437,7 @@ ul {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding-left: 16px;
 }
 
 .carousel-container::-webkit-scrollbar {
