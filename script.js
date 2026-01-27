@@ -148,3 +148,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('OSLAN E-commerce site loaded successfully! 🚀');
 });
+
+// Handle bfcache (back-forward cache) - updates cart when user navigates back
+window.addEventListener('pageshow', (event) => {
+    // Always update cart count when page is shown (including from bfcache)
+    updateCartCount();
+
+    if (event.persisted) {
+        console.log('Page restored from bfcache, cart count updated');
+    }
+});
+
+// Sync cart count across tabs/windows when localStorage changes
+window.addEventListener('storage', (event) => {
+    if (event.key === 'cart' || event.key === 'cartItems') {
+        updateCartCount();
+        console.log('Cart synced from another tab');
+    }
+});
+
+// Also update immediately in case script runs after DOM is ready
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    updateCartCount();
+}
