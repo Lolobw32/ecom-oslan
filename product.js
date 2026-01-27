@@ -403,5 +403,10 @@ if (document.body.classList.contains('product-detail-page')) {
     populateProductData();
     updateGallery();
 
+    // Initialize cart badge on page load
+    const initialCart = getCart();
+    const initialCount = initialCart.reduce((sum, item) => sum + item.quantity, 0);
+    updateCartBadge(initialCount);
+
     console.log('Product detail page loaded successfully! 🛍️');
 }
