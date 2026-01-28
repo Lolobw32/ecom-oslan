@@ -439,7 +439,6 @@ ul {
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-padding-left: 0;
-    /* Important for snap alignment with padding */
 }
 
 .carousel-container::-webkit-scrollbar {
@@ -449,13 +448,16 @@ ul {
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
-    padding: 0 12.5vw;
-    /* Padding on center: (100vw - 75vw) / 2 */
+    /* Left: Small margin (spacing-lg) */
+    /* Right: 12.5vw (Calculated to center the last 75vw item: (100-75)/2) */
+    padding: 0 12.5vw 0 var(--spacing-lg);
 }
 
 /* Explicit margins help ensure scroll space on all browsers */
 .carousel-slide:first-child {
     margin-left: 0;
+    scroll-snap-align: start;
+    /* Align first item to left */
 }
 
 .carousel-slide:last-child {
@@ -467,6 +469,7 @@ ul {
     width: 75vw;
     max-width: 320px;
     scroll-snap-align: center;
+    /* Default snap to center for others */
 }
 
 .carousel-image {
