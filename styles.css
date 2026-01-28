@@ -438,7 +438,8 @@ ul {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-padding-left: 0;
+    scroll-padding-left: 10px;
+    /* Snap respects 10px offset */
 }
 
 .carousel-container::-webkit-scrollbar {
