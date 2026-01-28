@@ -502,24 +502,16 @@ ul {
 }
 
 /* ===== Carousel Description ===== */
-.carousel-description-container {
-    padding: var(--spacing-lg) var(--spacing-lg) 0;
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.carousel-description-text {
-    font-size: var(--font-size-base);
+.carousel-desc {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-sm);
     color: var(--color-text-light);
-    line-height: 1.6;
+    line-height: 1.5;
     font-weight: 400;
-    transition: opacity 0.3s ease;
-    opacity: 1;
-}
-
-.carousel-description-text.fading {
-    opacity: 0;
+    white-space: normal;
+    /* Allow text to wrap */
+    max-width: 100%;
+    /* Ensure it fits within the slide width */
 }
 
 /* ===== Footer ===== */
