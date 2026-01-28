@@ -5,10 +5,10 @@
 const ADMIN_CONFIG = {
     defaultPeriod: 7, // days
     chartColors: {
-        primary: '#667eea',
-        secondary: '#764ba2',
-        success: '#43e97b',
-        danger: '#f5576c'
+        primary: '#111111',
+        secondary: '#666666',
+        success: '#059669', // Emerald 600
+        danger: '#b91c1c'
     }
 };
 
