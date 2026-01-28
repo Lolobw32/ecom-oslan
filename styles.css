@@ -509,9 +509,23 @@ ul {
     line-height: 1.5;
     font-weight: 400;
     white-space: normal;
-    /* Allow text to wrap */
     max-width: 100%;
-    /* Ensure it fits within the slide width */
+
+    /* Animation state: hidden by default */
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+}
+
+.carousel-slide.active .carousel-desc {
+    opacity: 1;
+    max-height: 100px;
+    /* Adjust if description is longer */
+    transform: translateY(0);
+    margin-top: var(--spacing-xs);
+    /* Ensure margin is applied on show */
 }
 
 /* ===== Footer ===== */

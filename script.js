@@ -157,8 +157,26 @@ function handleSwipe() {
     }
 }
 
-// ===== Carousel Description Logic (Removed) =====
-// Descriptions are now embedded directly in the HTML slides for better UX.
+// ===== Carousel Active Slide Logic =====
+const slides = document.querySelectorAll('.carousel-slide');
+
+if (slides.length > 0) {
+    const activeSlideObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            } else {
+                entry.target.classList.remove('active');
+            }
+        });
+    }, {
+        root: document.querySelector('.carousel-container'),
+        threshold: 0.7, // Trigger when 70% of the slide is visible
+        rootMargin: "0px -10% 0px -10%" // Adjust to focus on center
+    });
+
+    slides.forEach(slide => activeSlideObserver.observe(slide));
+}
 
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
