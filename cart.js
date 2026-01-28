@@ -257,11 +257,36 @@ if (backBtn) {
 
 // ===== Checkout =====
 if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
+    checkoutBtn.addEventListener('click', async () => {
         const cart = getCart();
         if (cart.length > 0) {
-            alert('Redirection vers le paiement...\n\nMerci pour votre commande OSLAN ! 🛍️');
-            // In a real app: window.location.href = 'checkout.html';
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Traitement...';
+
+            // Collect basic customer info (mocked for now, in real app would be form)
+            const customerInfo = {
+                address: "Adresse de test",
+                city: "Paris",
+                zip: "75000"
+            };
+
+            if (window.oslanAnalytics) {
+                const success = await window.oslanAnalytics.createOrder(cart, customerInfo);
+
+                if (success) {
+                    alert('Commande enregistrée avec succès ! Merci de votre achat OSLAN.');
+                    localStorage.removeItem('cart');
+                    localStorage.removeItem('cartItems');
+                    window.location.href = 'index.html'; // Redirect to success page normally
+                } else {
+                    alert('Une erreur est survenue. Veuillez réessayer.');
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Paiement';
+                }
+            } else {
+                console.error('Analytics script not loaded');
+                alert('Erreur technique. Veuillez recharger la page.');
+            }
         }
     });
 }
