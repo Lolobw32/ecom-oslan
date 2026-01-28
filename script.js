@@ -160,6 +160,50 @@ function handleSwipe() {
 // ===== Carousel Active Slide Logic =====
 // Removed: Descriptions are now always visible, no need for active slide detection
 
+// ===== Reviews Slider =====
+const reviewsSlider = document.getElementById('reviewsSlider');
+const reviewNextBtn = document.getElementById('reviewNextBtn');
+
+if (reviewsSlider && reviewNextBtn) {
+    const reviewCards = reviewsSlider.querySelectorAll('.review-card');
+    let currentReviewIndex = 0;
+    const totalReviews = reviewCards.length;
+    let isAnimating = false;
+
+    function showNextReview() {
+        if (isAnimating || totalReviews === 0) return;
+        isAnimating = true;
+
+        const currentCard = reviewCards[currentReviewIndex];
+        const nextIndex = (currentReviewIndex + 1) % totalReviews;
+        const nextCard = reviewCards[nextIndex];
+
+        // Start exit animation for current card
+        currentCard.classList.add('exiting');
+        currentCard.classList.remove('active');
+
+        // Prepare next card (positioned below, invisible)
+        nextCard.style.transform = 'translateY(100%)';
+        nextCard.style.opacity = '0';
+
+        // Small delay then bring in the next card
+        setTimeout(() => {
+            nextCard.classList.add('active');
+            nextCard.style.transform = '';
+            nextCard.style.opacity = '';
+        }, 50);
+
+        // Cleanup after animation completes
+        setTimeout(() => {
+            currentCard.classList.remove('exiting');
+            currentReviewIndex = nextIndex;
+            isAnimating = false;
+        }, 450);
+    }
+
+    reviewNextBtn.addEventListener('click', showNextReview);
+}
+
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
     // Initial cart count update
