@@ -120,7 +120,7 @@ function renderCart() {
         return `
             <div class="cart-item" data-index="${index}">
                 <div class="cart-item-image">
-                    <img src="${product.image}" alt="${product.title}">
+                    <img src="${product.image}" alt="${product.title}" width="80" height="80" loading="lazy">
                 </div>
                 <div class="cart-item-details">
                     <h3 class="cart-item-title">${product.title}</h3>
