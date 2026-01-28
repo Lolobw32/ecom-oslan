@@ -801,95 +801,68 @@ ul {
 }
 
 
-/* ===== Login Page Styles ===== */
+/* ===== Login Page Styles (NEW DESIGN) ===== */
 .login-page {
-    background-color: #1a1a1a;
-    /* Dark background for the top part */
+    background-color: var(--color-bg);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow-x: hidden;
+}
+
+/* Hero Image Section */
+.login-hero {
+    position: relative;
+    width: 100%;
+    height: 45vh;
+    min-height: 280px;
     overflow: hidden;
 }
 
-.login-header-bg {
-    height: 45vh;
-    width: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 60px;
-    /* Space for the card overlap */
-    position: relative;
-}
-
-.login-header-bg::before {
-    content: '';
-    position: absolute;
+.login-hero-img {
     width: 100%;
     height: 100%;
-    top: 0;
-    left: 0;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-    pointer-events: none;
+    object-fit: cover;
+    object-position: center;
 }
 
-.login-logo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-    z-index: 2;
-    margin-bottom: var(--spacing-xl);
-}
-
-.login-brand {
-    font-family: 'Questrial', sans-serif;
-    /* Or custom logo font if available, fallback to sans */
-    font-size: 2rem;
-    color: #ffffff;
-    letter-spacing: 2px;
-    font-weight: 300;
-}
-
-.user-avatars {
-    display: flex;
-    justify-content: center;
-    margin-top: var(--spacing-md);
-}
-
-.avatar-pile {
-    display: flex;
-    align-items: center;
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
+.login-back-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 44px;
+    height: 44px;
+    background-color: var(--color-bg);
     border-radius: 50%;
-    border: 2px solid #1a1a1a;
-    background-size: cover;
-    background-position: center;
-    background-color: #333;
-    margin-left: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    transition: var(--transition-fast);
+    z-index: 10;
 }
 
-.avatar:first-child {
-    margin-left: 0;
+.login-back-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+.login-back-btn:active {
+    transform: scale(0.95);
+}
+
+/* Login Card */
 .login-card {
     background-color: var(--color-bg);
     border-radius: 30px 30px 0 0;
     flex: 1;
     padding: var(--spacing-xl) var(--spacing-lg);
+    padding-bottom: 40px;
     position: relative;
-    margin-top: -40px;
-    /* Overlap effect */
+    margin-top: -30px;
     z-index: 10;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
 }
@@ -905,39 +878,67 @@ ul {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
 }
 
+/* Floating Label Input Group */
 .input-group {
     position: relative;
     display: flex;
     align-items: center;
 }
 
+.input-group.floating-label {
+    margin-top: 8px;
+}
+
 .input-icon {
     position: absolute;
     left: 16px;
     color: var(--color-text);
-    opacity: 0.5;
+    opacity: 0.4;
     display: flex;
     align-items: center;
+    z-index: 2;
+    pointer-events: none;
 }
 
 .form-input {
     width: 100%;
-    padding: 16px 48px;
+    padding: 20px 48px 12px 48px;
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-md);
     font-size: var(--font-size-base);
     background-color: var(--color-bg);
     color: var(--color-text);
     transition: var(--transition-normal);
+    font-family: var(--font-family);
 }
 
 .form-input:focus {
     outline: none;
     border-color: var(--color-text);
-    box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.1);
+}
+
+/* Floating Label Text */
+.floating-label-text {
+    position: absolute;
+    left: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--font-size-base);
+    color: var(--color-text-light);
+    pointer-events: none;
+    transition: var(--transition-fast);
+    background-color: transparent;
+}
+
+.form-input:focus~.floating-label-text,
+.form-input:not(:placeholder-shown)~.floating-label-text {
+    top: 12px;
+    transform: translateY(0);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
 }
 
 .clear-input,
@@ -945,9 +946,15 @@ ul {
     position: absolute;
     right: 16px;
     color: var(--color-text);
-    opacity: 0.5;
+    opacity: 0.4;
     padding: 4px;
     cursor: pointer;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
 }
 
 .clear-input:hover,
@@ -955,12 +962,14 @@ ul {
     opacity: 1;
 }
 
+/* Form Options */
 .form-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: var(--font-size-sm);
     color: var(--color-text-light);
+    margin-top: var(--spacing-xs);
 }
 
 .remember-me {
@@ -977,8 +986,8 @@ ul {
 .checkbox-custom {
     width: 18px;
     height: 18px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 50%;
     position: relative;
     transition: var(--transition-fast);
 }
@@ -999,53 +1008,95 @@ ul {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
     background-size: contain;
     background-repeat: no-repeat;
-    width: 10px;
-    height: 10px;
 }
 
 .forgot-password {
-    color: #e53935;
-    /* Using an accent color for this logic, or keep black? Original was orange. Red/error color usually draws attention but here it's an action. Let's stick to theme or orange if requested. "Exactement la même chose mais au couleur du site". Site is B&W. I'll use a bold text or simple color. */
-    color: var(--color-text);
-    /* Stick to mono */
-    font-weight: 500;
+    color: #1a1a1a;
+    font-weight: 600;
 }
 
+/* Submit Button - BLACK instead of orange */
 .submit-btn {
-    background-color: #e53935;
-    /* Oslan seems to have some red/orange accents in the heart or similar? The design requested "couleur du site". If site is B&W, key action button should be Black or maybe that Orange from the photo is desired? The user said "au couleur du site". I will use the secondary color or just Black. Let's use the nice Orange from user input as 'promo' maybe? No, let's use Black for premium feel or the Red from the heart active state. */
     background-color: #1a1a1a;
-    /* Safe bet for premium brand */
     color: #ffffff;
     padding: 16px;
-    border-radius: var(--border-radius-md);
+    border-radius: 50px;
     font-size: var(--font-size-base);
     font-weight: 600;
-    margin-top: var(--spacing-sm);
+    margin-top: var(--spacing-md);
     transition: var(--transition-normal);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    cursor: pointer;
 }
 
 .submit-btn:hover {
     background-color: #000000;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
 }
 
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Login Footer */
 .login-footer {
-    margin-top: auto;
-    /* Push to bottom if space allows */
+    margin-top: var(--spacing-xl);
     text-align: center;
-    padding-top: var(--spacing-xl);
     font-size: var(--font-size-sm);
     color: var(--color-text-light);
 }
 
+.login-footer p {
+    margin-bottom: var(--spacing-md);
+}
+
 .signup-link {
-    color: #e53935;
-    /* Orange/Red pop for sign up */
+    color: #1a1a1a;
     font-weight: 600;
     margin-left: 4px;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: var(--spacing-md) 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-border);
+}
+
+.divider span {
+    padding: 0 var(--spacing-md);
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+}
+
+/* Social Login Link */
+.social-login-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text);
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.social-login-link:hover {
+    opacity: 0.7;
+}
+
+.social-login-link svg {
+    transition: var(--transition-fast);
+}
+
+.social-login-link:hover svg {
+    transform: translateX(4px);
 }
 
 .gallery-slide img {

@@ -3,59 +3,46 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - OSLAN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Inline critical styles to avoid FOUC, but mostly using styles.css */
-        body {
-            background-color: var(--color-bg);
-        }
-    </style>
 </head>
 
 <body class="login-page">
 
-    <!-- Background Design Element (Top Dark Section) -->
-    <div class="login-header-bg">
-        <div class="login-logo-container">
-            <!-- Using the circular design from the reference image but with Oslan logo/icon -->
-            <div class="login-logo-circle">
-                <img src="assets/logo.png" alt="OSLAN" class="login-logo">
-            </div>
-            <h1 class="login-brand">OSLAN</h1>
-        </div>
+    <!-- Hero Image Background -->
+    <div class="login-hero">
+        <img src="assets/hero.jpg" alt="OSLAN Collection" class="login-hero-img">
 
-        <!-- User Avatars Pile (Decorative) -->
-        <div class="user-avatars">
-            <div class="avatar-pile">
-                <!-- Using placeholder avatars or simple circles if no assets -->
-                <div class="avatar" style="background-image: url('assets/hero.jpg')"></div>
-                <div class="avatar" style="background-image: url('assets/tshirt-blanc.jpg')"></div>
-                <div class="avatar" style="background-image: url('assets/tshirt-noir-homme.jpg')"></div>
-                <div class="avatar" style="background-image: url('assets/tshirt-noir-femme.jpg')"></div>
-            </div>
-        </div>
+        <!-- Back Button -->
+        <a href="index.html" class="login-back-btn" aria-label="Retour">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+        </a>
     </div>
 
-    <!-- Main Content Card (White Overlay) -->
+    <!-- Login Card -->
     <div class="login-card">
         <h2 class="login-title">Connectez-vous avec votre email</h2>
 
-        <form class="login-form">
-            <div class="input-group">
+        <form class="login-form" id="loginForm">
+            <!-- Email Input -->
+            <div class="input-group floating-label">
                 <div class="input-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
                         <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
                         <path d="M3 7l9 6 9-6"></path>
                     </svg>
                 </div>
-                <input type="email" placeholder="Adresse email" class="form-input" required>
+                <input type="email" id="email" class="form-input" placeholder=" " required>
+                <label for="email" class="floating-label-text">Adresse email</label>
                 <button type="button" class="clear-input" aria-label="Effacer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="15" y1="9" x2="9" y2="15"></line>
                         <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -63,56 +50,89 @@
                 </button>
             </div>
 
-            <div class="input-group">
+            <!-- Password Input -->
+            <div class="input-group floating-label">
                 <div class="input-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                 </div>
-                <input type="password" placeholder="Mot de passe" class="form-input" required>
+                <input type="password" id="password" class="form-input" placeholder=" " required>
+                <label for="password" class="floating-label-text">Mot de passe</label>
                 <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                 </button>
             </div>
 
+            <!-- Options Row -->
             <div class="form-options">
                 <label class="remember-me">
-                    <input type="checkbox" checked>
+                    <input type="checkbox">
                     <span class="checkbox-custom"></span>
                     <span class="label-text">Se souvenir de moi</span>
                 </label>
                 <a href="#" class="forgot-password">Mot de passe oublié ?</a>
             </div>
 
+            <!-- Submit Button -->
             <button type="submit" class="submit-btn">Continuer</button>
         </form>
 
+        <!-- Footer Links -->
         <div class="login-footer">
             <p>Pas de compte ? <a href="#" class="signup-link">S'inscrire</a></p>
+
+            <div class="divider">
+                <span>ou</span>
+            </div>
+
+            <a href="#" class="social-login-link">
+                Se connecter avec les réseaux
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
         </div>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // Inline specific logic for login page interactions
+        // Toggle password visibility
         document.querySelectorAll('.toggle-password').forEach(btn => {
             btn.addEventListener('click', () => {
-                const input = btn.previousElementSibling;
+                const input = btn.previousElementSibling.previousElementSibling;
                 if (input.type === 'password') {
                     input.type = 'text';
-                    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M1 1l22 22"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path></svg>`;
+                    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
                 } else {
                     input.type = 'password';
-                    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
                 }
             });
         });
 
-        // Return to home if close button or something was here, but standard browser back works
+        // Clear input button
+        document.querySelectorAll('.clear-input').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = btn.previousElementSibling.previousElementSibling;
+                input.value = '';
+                input.focus();
+            });
+        });
+
+        // Form submission (mock)
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Mock login - set token and redirect
+            localStorage.setItem('oslan_token', 'mock_token_12345');
+            window.location.href = 'index.html';
+        });
     </script>
 </body>
 
