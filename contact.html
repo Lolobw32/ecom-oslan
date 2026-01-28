@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - OSLAN</title>
+    <meta name="description"
+        content="Contactez OSLAN - Notre équipe est à votre écoute pour répondre à toutes vos questions.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="legal-page contact-page">
+    <!-- Header -->
+    <header class="header legal-header">
+        <a href="index.html" class="back-btn" aria-label="Retour">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <h1 class="page-title">Contact</h1>
+        <div class="header-spacer"></div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="legal-main">
+        <div class="legal-content">
+            <section class="legal-section contact-intro">
+                <h2>Nous contacter</h2>
+                <p>Notre équipe est à votre disposition pour répondre à toutes vos questions. N'hésitez pas à nous
+                    contacter !</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>📧 Email</h2>
+                <p>Pour toute question générale :</p>
+                <p><strong><a href="mailto:contact@oslan.fr">contact@oslan.fr</a></strong></p>
+                <p class="response-time">Délai de réponse : 24 à 48 heures ouvrées</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>📦 Suivi de commande</h2>
+                <p>Pour suivre votre commande ou signaler un problème de livraison :</p>
+                <p><strong><a href="mailto:commandes@oslan.fr">commandes@oslan.fr</a></strong></p>
+                <p>Merci d'indiquer votre numéro de commande dans l'objet du mail.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>↩️ Retours et remboursements</h2>
+                <p>Pour toute demande de retour ou remboursement :</p>
+                <p><strong><a href="mailto:retours@oslan.fr">retours@oslan.fr</a></strong></p>
+                <p>Consultez également notre <a href="remboursement.html">politique de remboursement</a>.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>📱 Réseaux sociaux</h2>
+                <p>Suivez-nous et contactez-nous sur nos réseaux :</p>
+                <div class="social-links">
+                    <a href="#" class="social-link">Instagram</a>
+                    <a href="#" class="social-link">TikTok</a>
+                    <a href="#" class="social-link">Facebook</a>
+                </div>
+            </section>
+
+            <section class="legal-section">
+                <h2>🏢 Adresse</h2>
+                <p><strong>OSLAN</strong></p>
+                <p>France</p>
+                <p class="note">Note : Nous ne disposons pas de boutique physique. Toutes les commandes sont traitées en
+                    ligne.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>⏰ Horaires</h2>
+                <p>Notre service client est disponible :</p>
+                <ul>
+                    <li><strong>Lundi - Vendredi :</strong> 9h00 - 18h00</li>
+                    <li><strong>Samedi - Dimanche :</strong> Fermé</li>
+                </ul>
+                <p>Les emails reçus le week-end seront traités dès le lundi matin.</p>
+            </section>
+
+            <!-- Contact Form -->
+            <section class="legal-section contact-form-section">
+                <h2>✉️ Formulaire de contact</h2>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="contactName">Nom complet *</label>
+                        <input type="text" id="contactName" name="name" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactEmail">Email *</label>
+                        <input type="email" id="contactEmail" name="email" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactSubject">Sujet *</label>
+                        <select id="contactSubject" name="subject" required class="form-input">
+                            <option value="">Sélectionnez un sujet</option>
+                            <option value="commande">Question sur une commande</option>
+                            <option value="produit">Question sur un produit</option>
+                            <option value="retour">Retour / Remboursement</option>
+                            <option value="partenariat">Partenariat / Collaboration</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactOrder">Numéro de commande (si applicable)</label>
+                        <input type="text" id="contactOrder" name="order" class="form-input"
+                            placeholder="Ex: OSL-123456">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactMessage">Message *</label>
+                        <textarea id="contactMessage" name="message" required class="form-input form-textarea" rows="5"
+                            placeholder="Décrivez votre demande en détail..."></textarea>
+                    </div>
+                    <button type="submit" class="form-submit">Envoyer le message</button>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <img src="assets/logo.png" alt="OSLAN" class="footer-logo">
+            <p class="footer-tagline">We are all in Oslan</p>
+            <div class="footer-links">
+                <a href="mentions-legales.html">Mentions Légales</a>
+                <a href="confidentialite.html">Confidentialité</a>
+                <a href="remboursement.html">Remboursement</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <p class="footer-copyright">© 2026 OSLAN. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Contact form handling
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            alert('Merci pour votre message ! Nous vous répondrons dans les plus brefs délais.');
+            this.reset();
+        });
+    </script>
+</body>
+
+</html>
