@@ -503,9 +503,6 @@ ul {
     letter-spacing: 0.5px;
 }
 
-.carousel-slide:last-child {
-    /* margin-right handled by track padding */
-}
 
 /* ===== Carousel Description ===== */
 .carousel-desc {
