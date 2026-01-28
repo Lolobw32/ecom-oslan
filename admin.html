@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - OSLAN</title>
+    <meta name="description" content="Dashboard administrateur OSLAN">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="admin-page">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <img src="assets/logo.png" alt="OSLAN" class="admin-logo">
+            <h1 class="admin-title">Dashboard Admin</h1>
+        </div>
+
+        <nav class="admin-nav">
+            <button class="admin-nav-btn active" data-section="analytics">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span>Analytics</span>
+            </button>
+
+            <button class="admin-nav-btn" data-section="products">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="6" width="22" height="12" rx="2" ry="2" />
+                    <path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                </svg>
+                <span>Produits</span>
+            </button>
+
+            <button class="admin-nav-btn" data-section="orders">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <span>Commandes</span>
+            </button>
+        </nav>
+
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-info">
+                <div class="admin-user-avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                    </svg>
+                </div>
+                <div class="admin-user-details">
+                    <span class="admin-user-name" id="adminUserName">Admin</span>
+                    <span class="admin-user-role">Administrateur</span>
+                </div>
+            </div>
+            <button class="admin-logout-btn" id="adminLogoutBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <h2 class="admin-section-title" id="adminSectionTitle">Analytics</h2>
+            <div class="admin-header-actions">
+                <a href="index.html" class="admin-view-site-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Voir le site
+                </a>
+            </div>
+        </header>
+
+        <!-- Analytics Section -->
+        <section class="admin-section active" id="analytics-section">
+            <!-- Period Filter -->
+            <div class="admin-period-filter">
+                <button class="period-btn active" data-period="7">7 jours</button>
+                <button class="period-btn" data-period="30">30 jours</button>
+                <button class="period-btn" data-period="90">90 jours</button>
+            </div>
+
+            <!-- KPIs -->
+            <div class="admin-kpis">
+                <div class="admin-kpi-card">
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23" />
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Chiffre d'affaires</span>
+                        <span class="kpi-value" id="kpiRevenue">0 €</span>
+                        <span class="kpi-change positive" id="kpiRevenueChange">+0%</span>
+                    </div>
+                </div>
+
+                <div class="admin-kpi-card">
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Commandes</span>
+                        <span class="kpi-value" id="kpiOrders">0</span>
+                        <span class="kpi-change positive" id="kpiOrdersChange">+0%</span>
+                    </div>
+                </div>
+
+                <div class="admin-kpi-card">
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Visiteurs</span>
+                        <span class="kpi-value" id="kpiVisitors">0</span>
+                        <span class="kpi-change positive" id="kpiVisitorsChange">+0%</span>
+                    </div>
+                </div>
+
+                <div class="admin-kpi-card">
+                    <div class="kpi-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">En direct</span>
+                        <span class="kpi-value" id="kpiLive">0</span>
+                        <span class="kpi-sublabel">visiteurs actifs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="admin-charts">
+                <div class="admin-chart-card">
+                    <h3 class="chart-title">Ventes</h3>
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="admin-chart-card">
+                    <h3 class="chart-title">Trafic</h3>
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="admin-section" id="products-section">
+            <div class="admin-section-header">
+                <button class="admin-btn-primary" id="addProductBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Ajouter un produit
+                </button>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Titre</th>
+                            <th>Prix</th>
+                            <th>Stock</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Products will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section class="admin-section" id="orders-section">
+            <div class="admin-section-header">
+                <div class="admin-filters">
+                    <select class="admin-select" id="orderStatusFilter">
+                        <option value="all">Tous les statuts</option>
+                        <option value="pending">En attente</option>
+                        <option value="processing">En cours</option>
+                        <option value="shipped">Expédiée</option>
+                        <option value="delivered">Livrée</option>
+                        <option value="cancelled">Annulée</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Orders will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Modal -->
+    <div class="admin-modal" id="productModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title" id="productModalTitle">Ajouter un produit</h3>
+                <button class="admin-modal-close" id="closeProductModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <form class="admin-modal-form" id="productForm">
+                <div class="admin-form-group">
+                    <label for="productTitle">Titre</label>
+                    <input type="text" id="productTitle" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+                <div class="admin-form-row">
+                    <div class="admin-form-group">
+                        <label for="productPrice">Prix (€)</label>
+                        <input type="number" id="productPrice" step="0.01" min="0" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="productStock">Stock</label>
+                        <input type="number" id="productStock" min="0" required>
+                    </div>
+                </div>
+                <div class="admin-form-group">
+                    <label for="productImage">URL Image</label>
+                    <input type="text" id="productImage">
+                </div>
+                <div class="admin-form-group">
+                    <label for="productCategory">Catégorie</label>
+                    <input type="text" id="productCategory">
+                </div>
+                <div class="admin-modal-actions">
+                    <button type="button" class="admin-btn-secondary" id="cancelProductBtn">Annuler</button>
+                    <button type="submit" class="admin-btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="admin-modal" id="orderModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title">Détails de la commande</h3>
+                <button class="admin-modal-close" id="closeOrderModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="admin-modal-body" id="orderDetailsContent">
+                <!-- Order details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="admin.js"></script>
+</body>
+
+</html>

@@ -87,6 +87,28 @@ async function isLoggedIn() {
     return user !== null;
 }
 
+// ===== Admin Helper Functions =====
+async function isAdmin() {
+    const client = getSupabaseClient();
+    if (!client) return false;
+
+    try {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) return false;
+
+        const { data: profile } = await client
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        return profile && profile.role === 'admin';
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+}
+
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', getSupabaseClient);
