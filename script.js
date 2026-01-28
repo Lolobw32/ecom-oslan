@@ -17,11 +17,8 @@ if (profileBtn) {
         if (!isLoggedIn) {
             window.location.href = 'login.html';
         } else {
-            // If logged in, maybe go to account page? 
-            // For now, let's just log it or maybe still go to login if no account page exists?
-            // User asked: "si on n'est pas connecté... ça nous renvoie vers une page".
-            console.log('User is logged in');
-            alert('Vous êtes déjà connecté !');
+            // Redirect to profile page
+            window.location.href = 'profil.html';
         }
     });
 }

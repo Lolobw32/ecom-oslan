@@ -160,8 +160,9 @@
                     return;
                 }
 
-                // Success - redirect to home
-                window.location.href = 'index.html';
+                // Success - set token and redirect to profile
+                localStorage.setItem('oslan_token', 'true');
+                window.location.href = 'profil.html';
 
             } catch (err) {
                 showError('Une erreur est survenue. Veuillez réessayer.');
