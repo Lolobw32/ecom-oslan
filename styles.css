@@ -1056,6 +1056,17 @@ ul {
     margin-left: 4px;
 }
 
+/* Form Row - Two columns side by side */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.form-row .input-group {
+    margin-top: 0;
+}
+
 /* Divider */
 .divider {
     display: flex;

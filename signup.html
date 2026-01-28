@@ -30,6 +30,35 @@
         <h2 class="login-title">Créer un compte</h2>
 
         <form class="login-form" id="signupForm">
+            <!-- Name Row: Prénom (left) + Nom (right) -->
+            <div class="form-row">
+                <!-- Prénom Input -->
+                <div class="input-group floating-label">
+                    <div class="input-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="prenom" class="form-input" placeholder=" " required>
+                    <label for="prenom" class="floating-label-text">Prénom</label>
+                </div>
+
+                <!-- Nom Input -->
+                <div class="input-group floating-label">
+                    <div class="input-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="nom" class="form-input" placeholder=" " required>
+                    <label for="nom" class="floating-label-text">Nom</label>
+                </div>
+            </div>
+
             <!-- Email Input -->
             <div class="input-group floating-label">
                 <div class="input-icon">
@@ -41,32 +70,6 @@
                 </div>
                 <input type="email" id="email" class="form-input" placeholder=" " required>
                 <label for="email" class="floating-label-text">Adresse email</label>
-            </div>
-
-            <!-- Prénom Input -->
-            <div class="input-group floating-label">
-                <div class="input-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.5">
-                        <circle cx="12" cy="8" r="4"></circle>
-                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-                    </svg>
-                </div>
-                <input type="text" id="prenom" class="form-input" placeholder=" " required>
-                <label for="prenom" class="floating-label-text">Prénom</label>
-            </div>
-
-            <!-- Nom Input -->
-            <div class="input-group floating-label">
-                <div class="input-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1.5">
-                        <circle cx="12" cy="8" r="4"></circle>
-                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-                    </svg>
-                </div>
-                <input type="text" id="nom" class="form-input" placeholder=" " required>
-                <label for="nom" class="floating-label-text">Nom</label>
             </div>
 
             <!-- Password Input -->
