@@ -5,6 +5,26 @@ const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 const favoriteButtons = document.querySelectorAll('.favorite-btn');
 const cartCount = document.getElementById('cartCount');
+const profileBtn = document.getElementById('profileBtn');
+
+// ===== Profile / Login Logic =====
+if (profileBtn) {
+    profileBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Check if user is "connected" - for now we simulate NOT connected to show the page
+        const isLoggedIn = localStorage.getItem('oslan_token');
+
+        if (!isLoggedIn) {
+            window.location.href = 'login.html';
+        } else {
+            // If logged in, maybe go to account page? 
+            // For now, let's just log it or maybe still go to login if no account page exists?
+            // User asked: "si on n'est pas connecté... ça nous renvoie vers une page".
+            console.log('User is logged in');
+            alert('Vous êtes déjà connecté !');
+        }
+    });
+}
 
 // ===== Sidebar Toggle =====
 function openSidebar() {
