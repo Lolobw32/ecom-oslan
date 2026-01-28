@@ -448,9 +448,9 @@ ul {
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
-    /* Left: Small margin (spacing-lg) */
+    /* Left: 10px specific margin */
     /* Right: 12.5vw (Calculated to center the last 75vw item: (100-75)/2) */
-    padding: 0 12.5vw 0 var(--spacing-lg);
+    padding: 0 12.5vw 0 10px;
 }
 
 /* Explicit margins help ensure scroll space on all browsers */
