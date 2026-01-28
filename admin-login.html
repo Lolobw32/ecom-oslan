@@ -177,11 +177,10 @@
 
             <form class="admin-login-form" id="adminLoginForm">
                 <div class="admin-form-group">
-                    <label for="adminEmail" class="admin-form-label">Email administrateur</label>
-                    <input type="email" id="adminEmail" class="admin-form-input" placeholder="admin@oslan.com" required
-                        autocomplete="email">
+                    <label for="adminEmail" class="admin-form-label">Identifiant</label>
+                    <input type="text" id="adminEmail" class="admin-form-input" placeholder="admin" required
+                        autocomplete="username">
                 </div>
-
                 <div class="admin-form-group">
                     <label for="adminPassword" class="admin-form-label">Mot de passe</label>
                     <input type="password" id="adminPassword" class="admin-form-input" placeholder="••••••••" required
@@ -232,7 +231,7 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const email = emailInput.value.trim();
+            const username = emailInput.value.trim();
             const password = passwordInput.value;
 
             // Disable button
@@ -240,37 +239,37 @@
             loginBtn.textContent = 'Connexion...';
 
             try {
-                // Sign in with Supabase
-                const { data: authData, error: authError } = await signInUser(email, password);
-
-                if (authError) {
-                    throw new Error(authError.message);
-                }
-
-                if (!authData || !authData.user) {
-                    throw new Error('Échec de la connexion');
-                }
-
-                // Check if user is admin
                 const client = getSupabaseClient();
-                const { data: profile, error: profileError } = await client
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', authData.user.id)
-                    .single();
-
-                if (profileError) {
-                    throw new Error('Erreur lors de la vérification du rôle');
+                if (!client) {
+                    throw new Error('Erreur de connexion à la base de données');
                 }
 
-                if (!profile || profile.role !== 'admin') {
-                    // Not an admin - sign out and show error
-                    await signOutUser();
-                    throw new Error('Accès refusé. Seuls les administrateurs peuvent se connecter ici.');
+                // Vérifier les identifiants via la fonction Supabase
+                const { data, error } = await client.rpc('verify_admin_login', {
+                    p_username: username,
+                    p_password: password
+                });
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw new Error('Erreur lors de la vérification des identifiants');
                 }
 
-                // Success - redirect to admin dashboard
+                if (!data) {
+                    throw new Error('Identifiant ou mot de passe incorrect');
+                }
+
+                // Success - créer une session admin
+                const adminSession = {
+                    username: username,
+                    loginTime: new Date().toISOString(),
+                    isAdmin: true
+                };
+
+                localStorage.setItem('oslan_admin_session', JSON.stringify(adminSession));
                 localStorage.setItem('oslan_token', 'true');
+
+                // Redirect to admin dashboard
                 window.location.href = 'admin.html';
 
             } catch (error) {
@@ -278,12 +277,10 @@
 
                 let errorMsg = 'Une erreur est survenue. Veuillez réessayer.';
 
-                if (error.message.includes('Invalid login credentials')) {
-                    errorMsg = 'Email ou mot de passe incorrect';
-                } else if (error.message.includes('Accès refusé')) {
-                    errorMsg = error.message;
-                } else if (error.message.includes('Email not confirmed')) {
-                    errorMsg = 'Veuillez confirmer votre email';
+                if (error.message.includes('Identifiant ou mot de passe incorrect')) {
+                    errorMsg = 'Identifiant ou mot de passe incorrect';
+                } else if (error.message.includes('base de données')) {
+                    errorMsg = 'Erreur de connexion. Vérifiez que le script SQL a été exécuté.';
                 }
 
                 showError(errorMsg);
@@ -293,26 +290,19 @@
         });
 
         // Check if already logged in as admin
-        document.addEventListener('DOMContentLoaded', async () => {
-            const client = getSupabaseClient();
-            if (!client) return;
-
-            try {
-                const { data: { user } } = await client.auth.getUser();
-                if (user) {
-                    const { data: profile } = await client
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', user.id)
-                        .single();
-
-                    if (profile && profile.role === 'admin') {
-                        // Already logged in as admin, redirect
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminSession = localStorage.getItem('oslan_admin_session');
+            if (adminSession) {
+                try {
+                    const session = JSON.parse(adminSession);
+                    if (session.isAdmin) {
+                        // Already logged in, redirect
                         window.location.href = 'admin.html';
                     }
+                } catch (e) {
+                    // Invalid session, clear it
+                    localStorage.removeItem('oslan_admin_session');
                 }
-            } catch (error) {
-                console.error('Error checking login status:', error);
             }
         });
     </script>

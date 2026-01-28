@@ -20,50 +20,49 @@ let trafficChart = null;
 
 // ===== AUTHENTICATION & ACCESS CONTROL =====
 async function checkAdminAccess() {
-    const client = getSupabaseClient();
-    if (!client) {
-        redirectToHome();
+    // Vérifier la session admin dans localStorage
+    const adminSession = localStorage.getItem('oslan_admin_session');
+
+    if (!adminSession) {
+        console.log('No admin session found');
+        redirectToLogin();
         return false;
     }
 
     try {
-        // Get current user
-        const { data: { user }, error: userError } = await client.auth.getUser();
+        const session = JSON.parse(adminSession);
 
-        if (userError || !user) {
-            console.log('No user logged in');
-            redirectToHome();
+        if (!session.isAdmin) {
+            console.log('Not an admin session');
+            redirectToLogin();
             return false;
         }
 
-        // Check if user is admin
-        const { data: profile, error: profileError } = await client
-            .from('profiles')
-            .select('role, email, first_name, last_name')
-            .eq('id', user.id)
-            .single();
+        // Vérifier que la session n'est pas trop ancienne (24h)
+        const loginTime = new Date(session.loginTime);
+        const now = new Date();
+        const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
 
-        if (profileError || !profile || profile.role !== 'admin') {
-            console.log('User is not admin');
-            redirectToHome();
+        if (hoursSinceLogin > 24) {
+            console.log('Session expired');
+            localStorage.removeItem('oslan_admin_session');
+            redirectToLogin();
             return false;
         }
 
         // Update UI with admin info
-        const adminName = profile.first_name && profile.last_name
-            ? `${profile.first_name} ${profile.last_name}`
-            : profile.email.split('@')[0];
-        document.getElementById('adminUserName').textContent = adminName;
+        document.getElementById('adminUserName').textContent = session.username || 'Admin';
 
         return true;
     } catch (error) {
         console.error('Error checking admin access:', error);
-        redirectToHome();
+        localStorage.removeItem('oslan_admin_session');
+        redirectToLogin();
         return false;
     }
 }
 
-function redirectToHome() {
+function redirectToLogin() {
     window.location.href = 'admin-login.html';
 }
 
@@ -662,14 +661,11 @@ function initOrderFilter() {
     filter.addEventListener('change', loadOrders);
 }
 
-// ===== LOGOUT =====
 function initLogout() {
     const logoutBtn = document.getElementById('adminLogoutBtn');
     logoutBtn.addEventListener('click', async () => {
-        const client = getSupabaseClient();
-        if (client) {
-            await client.auth.signOut();
-        }
+        // Clear admin session
+        localStorage.removeItem('oslan_admin_session');
         localStorage.removeItem('oslan_token');
         window.location.href = 'admin-login.html';
     });
