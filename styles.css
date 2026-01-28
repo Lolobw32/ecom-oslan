@@ -945,6 +945,13 @@ ul {
     visibility: hidden;
 }
 
+/* Hide icon when input has content */
+.form-input:not(:placeholder-shown)~.input-icon,
+.input-group:has(.form-input:not(:placeholder-shown)) .input-icon {
+    opacity: 0;
+    visibility: hidden;
+}
+
 .clear-input,
 .toggle-password {
     position: absolute;
