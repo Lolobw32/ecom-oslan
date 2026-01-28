@@ -438,8 +438,8 @@ ul {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-padding-left: 10px;
-    /* Snap respects 10px offset */
+    scroll-padding-left: 20px;
+    /* Snap respects 20px offset */
 }
 
 .carousel-container::-webkit-scrollbar {
@@ -449,15 +449,15 @@ ul {
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
-    /* Right: 12.5vw to center the last item */
-    padding: 0 12.5vw 0 0;
+    /* Right: 20px to match left spacing */
+    padding: 0 20px 0 0;
     /* Removing left padding */
 }
 
 /* Explicit margins help ensure scroll space on all browsers */
 .carousel-slide:first-child {
-    margin-left: 10px;
-    /* Force 10px spacing */
+    margin-left: 20px;
+    /* Force 20px spacing */
     scroll-snap-align: start;
     /* Align first item to left */
 }
