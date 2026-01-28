@@ -64,7 +64,7 @@ async function checkAdminAccess() {
 }
 
 function redirectToHome() {
-    window.location.href = 'index.html';
+    window.location.href = 'admin-login.html';
 }
 
 // ===== NAVIGATION =====
@@ -671,7 +671,7 @@ function initLogout() {
             await client.auth.signOut();
         }
         localStorage.removeItem('oslan_token');
-        window.location.href = 'index.html';
+        window.location.href = 'admin-login.html';
     });
 }
 

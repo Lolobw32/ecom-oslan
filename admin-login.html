@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion Admin - OSLAN</title>
+    <meta name="description" content="Connexion administrateur OSLAN">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .admin-login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .admin-login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-login-logo {
+            height: 50px;
+            margin-bottom: 16px;
+        }
+
+        .admin-login-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin: 0 0 8px 0;
+        }
+
+        .admin-login-subtitle {
+            font-size: 0.9375rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .admin-login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .admin-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .admin-form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .admin-form-input {
+            padding: 14px 16px;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .admin-form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .admin-form-input::placeholder {
+            color: #999;
+        }
+
+        .admin-login-btn {
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .admin-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .admin-login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .admin-error-message {
+            padding: 12px 16px;
+            background: #ffebee;
+            color: #c62828;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+            margin-top: 8px;
+        }
+
+        .admin-error-message.show {
+            display: block;
+        }
+
+        .admin-back-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            color: #666;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .admin-back-link:hover {
+            color: #1a1a1a;
+        }
+
+        .admin-security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+            padding: 12px;
+            background: #f5f7fa;
+            border-radius: 12px;
+            font-size: 0.8125rem;
+            color: #666;
+        }
+
+        .admin-security-badge svg {
+            color: #43e97b;
+        }
+    </style>
+</head>
+
+<body class="admin-login-page">
+    <div class="admin-login-container">
+        <div class="admin-login-card">
+            <div class="admin-login-header">
+                <img src="assets/logo.png" alt="OSLAN" class="admin-login-logo">
+                <h1 class="admin-login-title">Espace Admin</h1>
+                <p class="admin-login-subtitle">Connectez-vous pour accéder au dashboard</p>
+            </div>
+
+            <form class="admin-login-form" id="adminLoginForm">
+                <div class="admin-form-group">
+                    <label for="adminEmail" class="admin-form-label">Email administrateur</label>
+                    <input type="email" id="adminEmail" class="admin-form-input" placeholder="admin@oslan.com" required
+                        autocomplete="email">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="adminPassword" class="admin-form-label">Mot de passe</label>
+                    <input type="password" id="adminPassword" class="admin-form-input" placeholder="••••••••" required
+                        autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="admin-login-btn" id="adminLoginBtn">
+                    Se connecter
+                </button>
+
+                <div class="admin-error-message" id="adminErrorMessage"></div>
+            </form>
+
+            <div class="admin-security-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                Connexion sécurisée
+            </div>
+
+            <a href="index.html" class="admin-back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Retour au site
+            </a>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        const form = document.getElementById('adminLoginForm');
+        const emailInput = document.getElementById('adminEmail');
+        const passwordInput = document.getElementById('adminPassword');
+        const loginBtn = document.getElementById('adminLoginBtn');
+        const errorMessage = document.getElementById('adminErrorMessage');
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Connexion...';
+
+            try {
+                // Sign in with Supabase
+                const { data: authData, error: authError } = await signInUser(email, password);
+
+                if (authError) {
+                    throw new Error(authError.message);
+                }
+
+                if (!authData || !authData.user) {
+                    throw new Error('Échec de la connexion');
+                }
+
+                // Check if user is admin
+                const client = getSupabaseClient();
+                const { data: profile, error: profileError } = await client
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', authData.user.id)
+                    .single();
+
+                if (profileError) {
+                    throw new Error('Erreur lors de la vérification du rôle');
+                }
+
+                if (!profile || profile.role !== 'admin') {
+                    // Not an admin - sign out and show error
+                    await signOutUser();
+                    throw new Error('Accès refusé. Seuls les administrateurs peuvent se connecter ici.');
+                }
+
+                // Success - redirect to admin dashboard
+                localStorage.setItem('oslan_token', 'true');
+                window.location.href = 'admin.html';
+
+            } catch (error) {
+                console.error('Login error:', error);
+
+                let errorMsg = 'Une erreur est survenue. Veuillez réessayer.';
+
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMsg = 'Email ou mot de passe incorrect';
+                } else if (error.message.includes('Accès refusé')) {
+                    errorMsg = error.message;
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMsg = 'Veuillez confirmer votre email';
+                }
+
+                showError(errorMsg);
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Se connecter';
+            }
+        });
+
+        // Check if already logged in as admin
+        document.addEventListener('DOMContentLoaded', async () => {
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            try {
+                const { data: { user } } = await client.auth.getUser();
+                if (user) {
+                    const { data: profile } = await client
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (profile && profile.role === 'admin') {
+                        // Already logged in as admin, redirect
+                        window.location.href = 'admin.html';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
