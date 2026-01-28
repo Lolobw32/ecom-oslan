@@ -1489,6 +1489,7 @@ ul {
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #ffffff;
 }
 
 .cookie-content p {

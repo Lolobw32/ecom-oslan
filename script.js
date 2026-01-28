@@ -229,6 +229,7 @@ function initCookieConsent() {
         setTimeout(() => {
             popup.remove();
         }, 500);
+        triggerConfetti();
     });
 
     // Handle Refuse
@@ -240,6 +241,58 @@ function initCookieConsent() {
         }, 500);
     });
 }
+
+// ===== Confetti Animation =====
+function triggerConfetti() {
+    const colors = ['#ffffff', '#f4f4f4', '#e0e0e0', '#dcdcdc']; // White/Silver shades to match site theme
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '99999';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < 60; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'absolute';
+        confetti.style.top = '-10px';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.width = Math.random() * 8 + 4 + 'px';
+        confetti.style.height = Math.random() * 5 + 3 + 'px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.opacity = Math.random() * 0.5 + 0.5;
+
+        // Random falling animation
+        const duration = Math.random() * 2 + 1.5; // between 1.5s and 3.5s
+        const delay = Math.random() * 1;
+
+        confetti.animate([
+            { transform: `translate3d(0, 0, 0) rotate(0deg)` },
+            { transform: `translate3d(${Math.random() * 100 - 50}px, 100vh, 0) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+        ], {
+            duration: duration * 1000,
+            delay: delay * 1000,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        });
+
+        // Remove element after animation
+        setTimeout(() => {
+            confetti.remove();
+        }, (duration + delay) * 1000);
+
+        container.appendChild(confetti);
+    }
+
+    // Cleanup container
+    setTimeout(() => {
+        container.remove();
+    }, 5000);
+}
+
+
 
 // Initialize cookie consent
 document.addEventListener('DOMContentLoaded', initCookieConsent);
