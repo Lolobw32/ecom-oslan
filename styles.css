@@ -438,7 +438,7 @@ ul {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    scroll-padding-left: var(--spacing-lg);
+    scroll-padding-left: 0;
     /* Important for snap alignment with padding */
 }
 
@@ -449,8 +449,8 @@ ul {
 .carousel-track {
     display: flex;
     gap: var(--spacing-md);
-    padding: 0 var(--spacing-lg);
-    /* Padding on both sides */
+    padding: 0 12.5vw;
+    /* Padding on center: (100vw - 75vw) / 2 */
 }
 
 /* Explicit margins help ensure scroll space on all browsers */
@@ -459,14 +459,14 @@ ul {
 }
 
 .carousel-slide:last-child {
-    /* margin-right is handled by specific rule below to ensure spacing */
+    margin-right: 0;
 }
 
 .carousel-slide {
     flex: 0 0 auto;
     width: 75vw;
     max-width: 320px;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
 }
 
 .carousel-image {
@@ -498,7 +498,7 @@ ul {
 }
 
 .carousel-slide:last-child {
-    margin-right: var(--spacing-lg);
+    /* margin-right handled by track padding */
 }
 
 /* ===== Carousel Description ===== */
@@ -510,23 +510,9 @@ ul {
     font-weight: 400;
     white-space: normal;
     max-width: 100%;
-
-    /* Animation state: hidden by default */
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transform: translateY(10px);
-    transition: all 0.4s ease;
 }
 
-.carousel-slide.active .carousel-desc {
-    opacity: 1;
-    max-height: 100px;
-    /* Adjust if description is longer */
-    transform: translateY(0);
-    margin-top: var(--spacing-xs);
-    /* Ensure margin is applied on show */
-}
+/* Active state logic removed to keep text always visible */
 
 /* ===== Footer ===== */
 .footer {
