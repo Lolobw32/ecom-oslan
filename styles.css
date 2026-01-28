@@ -1452,6 +1452,110 @@ ul {
     animation-delay: 0.4s;
 }
 
+/* ===== Cookie Consent Popup ===== */
+.cookie-popup {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 340px;
+    /* Glassmorphism styling */
+    background: rgba(20, 20, 20, 0.7);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    z-index: 9999;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    color: var(--color-text);
+    /* Animation */
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    pointer-events: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.cookie-popup.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.cookie-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cookie-content p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.cookie-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.cookie-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+/* "Accepter" button (Primary) */
+.cookie-accept {
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+
+.cookie-accept:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.cookie-accept:active {
+    transform: translateY(1px);
+}
+
+/* "Refuser" button (Secondary) */
+.cookie-refuse {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cookie-refuse:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.cookie-refuse:active {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+    .cookie-popup {
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        padding: 20px;
+    }
+}
+
 /* ===== Legal Pages ===== */
 .legal-page {
     background-color: var(--color-bg);

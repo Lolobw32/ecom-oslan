@@ -190,3 +190,56 @@ window.addEventListener('storage', (event) => {
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     updateCartCount();
 }
+
+// ===== Cookie Consent Popup =====
+function initCookieConsent() {
+    // Check if user has already made a choice
+    if (localStorage.getItem('cookieConsent')) return;
+
+    // Create popup HTML
+    const popupHTML = `
+        <div id="cookie-consent" class="cookie-popup">
+            <div class="cookie-content">
+                <h3>🍪 Cookies</h3>
+                <p>Nous utilisons des cookies pour améliorer votre expérience sur OSLAN. En continuant, vous acceptez notre utilisation des cookies.</p>
+                <div class="cookie-buttons">
+                    <button id="btn-refuse" class="cookie-btn cookie-refuse">Refuser</button>
+                    <button id="btn-accept" class="cookie-btn cookie-accept">Accepter</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Inject into DOM
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+
+    const popup = document.getElementById('cookie-consent');
+    const btnAccept = document.getElementById('btn-accept');
+    const btnRefuse = document.getElementById('btn-refuse');
+
+    // Show popup with a small delay for animation effect
+    setTimeout(() => {
+        popup.classList.add('show');
+    }, 1000);
+
+    // Handle Accept
+    btnAccept.addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'accepted');
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.remove();
+        }, 500);
+    });
+
+    // Handle Refuse
+    btnRefuse.addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'refused');
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.remove();
+        }, 500);
+    });
+}
+
+// Initialize cookie consent
+document.addEventListener('DOMContentLoaded', initCookieConsent);
