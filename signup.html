@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - OSLAN</title>
+    <title>Créer un compte - OSLAN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,11 +25,11 @@
         </a>
     </div>
 
-    <!-- Login Card -->
+    <!-- Signup Card -->
     <div class="login-card">
-        <h2 class="login-title">Connectez-vous avec votre email</h2>
+        <h2 class="login-title">Créer un compte</h2>
 
-        <form class="login-form" id="loginForm">
+        <form class="login-form" id="signupForm">
             <!-- Email Input -->
             <div class="input-group floating-label">
                 <div class="input-icon">
@@ -41,13 +41,32 @@
                 </div>
                 <input type="email" id="email" class="form-input" placeholder=" " required>
                 <label for="email" class="floating-label-text">Adresse email</label>
-                <button type="button" class="clear-input" aria-label="Effacer">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
+            </div>
+
+            <!-- Prénom Input -->
+            <div class="input-group floating-label">
+                <div class="input-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
                     </svg>
-                </button>
+                </div>
+                <input type="text" id="prenom" class="form-input" placeholder=" " required>
+                <label for="prenom" class="floating-label-text">Prénom</label>
+            </div>
+
+            <!-- Nom Input -->
+            <div class="input-group floating-label">
+                <div class="input-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                    </svg>
+                </div>
+                <input type="text" id="nom" class="form-input" placeholder=" " required>
+                <label for="nom" class="floating-label-text">Nom</label>
             </div>
 
             <!-- Password Input -->
@@ -70,23 +89,13 @@
                 </button>
             </div>
 
-            <!-- Options Row -->
-            <div class="form-options">
-                <label class="remember-me">
-                    <input type="checkbox">
-                    <span class="checkbox-custom"></span>
-                    <span class="label-text">Se souvenir de moi</span>
-                </label>
-                <a href="#" class="forgot-password">Mot de passe oublié ?</a>
-            </div>
-
             <!-- Submit Button -->
-            <button type="submit" class="submit-btn">Continuer</button>
+            <button type="submit" class="submit-btn">Créer mon compte</button>
         </form>
 
         <!-- Footer Links -->
         <div class="login-footer">
-            <p>Pas de compte ? <a href="signup.html" class="signup-link">S'inscrire</a></p>
+            <p>Déjà un compte ? <a href="login.html" class="signup-link">Se connecter</a></p>
         </div>
     </div>
 
@@ -106,19 +115,10 @@
             });
         });
 
-        // Clear input button
-        document.querySelectorAll('.clear-input').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const input = btn.previousElementSibling.previousElementSibling;
-                input.value = '';
-                input.focus();
-            });
-        });
-
         // Form submission (mock)
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            // Mock login - set token and redirect
+            // Mock signup - set token and redirect
             localStorage.setItem('oslan_token', 'mock_token_12345');
             window.location.href = 'index.html';
         });
