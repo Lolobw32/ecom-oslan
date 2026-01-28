@@ -1067,6 +1067,19 @@ ul {
     margin-top: 0;
 }
 
+/* Error Message */
+.error-message {
+    display: none;
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid #f5c6cb;
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    text-align: center;
+}
+
 /* Divider */
 .divider {
     display: flex;

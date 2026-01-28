@@ -100,8 +100,14 @@
         <div class="login-footer">
             <p>Déjà un compte ? <a href="login.html" class="signup-link">Se connecter</a></p>
         </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message"></div>
     </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script src="script.js"></script>
     <script>
         // Toggle password visibility
@@ -118,12 +124,72 @@
             });
         });
 
-        // Form submission (mock)
-        document.getElementById('signupForm').addEventListener('submit', (e) => {
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            errorDiv.style.backgroundColor = '#d4edda';
+            errorDiv.style.color = '#155724';
+            errorDiv.style.borderColor = '#c3e6cb';
+        }
+
+        // Form submission with Supabase
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Mock signup - set token and redirect
-            localStorage.setItem('oslan_token', 'mock_token_12345');
-            window.location.href = 'index.html';
+
+            const submitBtn = document.querySelector('.submit-btn');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const prenom = document.getElementById('prenom').value;
+            const nom = document.getElementById('nom').value;
+
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Création...';
+
+            try {
+                const { data, error } = await signUpUser(email, password, {
+                    first_name: prenom,
+                    last_name: nom,
+                    full_name: `${prenom} ${nom}`
+                });
+
+                if (error) {
+                    // Handle specific errors
+                    if (error.message.includes('already registered')) {
+                        showError('Cet email est déjà utilisé');
+                    } else if (error.message.includes('Password')) {
+                        showError('Le mot de passe doit contenir au moins 6 caractères');
+                    } else {
+                        showError(error.message);
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Créer mon compte';
+                    return;
+                }
+
+                // Success - show message and redirect
+                showSuccess('Compte créé ! Vérifiez votre email pour confirmer.');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+
+            } catch (err) {
+                showError('Une erreur est survenue. Veuillez réessayer.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Créer mon compte';
+            }
         });
     </script>
 </body>

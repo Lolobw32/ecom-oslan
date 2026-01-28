@@ -88,8 +88,14 @@
         <div class="login-footer">
             <p>Pas de compte ? <a href="signup.html" class="signup-link">S'inscrire</a></p>
         </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
     </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script src="script.js"></script>
     <script>
         // Toggle password visibility
@@ -115,12 +121,53 @@
             });
         });
 
-        // Form submission (mock)
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Form submission with Supabase
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            // Mock login - set token and redirect
-            localStorage.setItem('oslan_token', 'mock_token_12345');
-            window.location.href = 'index.html';
+
+            const submitBtn = document.querySelector('.submit-btn');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Connexion...';
+
+            try {
+                const { data, error } = await signInUser(email, password);
+
+                if (error) {
+                    // Handle specific errors
+                    if (error.message.includes('Invalid login credentials')) {
+                        showError('Email ou mot de passe incorrect');
+                    } else if (error.message.includes('Email not confirmed')) {
+                        showError('Veuillez confirmer votre email avant de vous connecter');
+                    } else {
+                        showError(error.message);
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Continuer';
+                    return;
+                }
+
+                // Success - redirect to home
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                showError('Une erreur est survenue. Veuillez réessayer.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Continuer';
+            }
         });
     </script>
 </body>
