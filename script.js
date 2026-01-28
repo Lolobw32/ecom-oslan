@@ -157,6 +157,46 @@ function handleSwipe() {
     }
 }
 
+// ===== Carousel Description Logic =====
+const carouselContainer = document.querySelector('.carousel-container');
+const carouselSlides = document.querySelectorAll('.carousel-slide');
+const descriptionText = document.getElementById('carouselDescription');
+
+const carouselDescriptions = [
+    "Explorez l'essence du streetwear avec nos pièces signatures. Une fusion parfaite entre confort et style urbain.",
+    "Des coupes audacieuses et des designs uniques. Révélez votre style avec notre collection exclusive pour femmes.",
+    "L'alliance du caractère et de la modernité. Découvrez nos essentiels streetwear pensés pour l'homme contemporain."
+];
+
+if (carouselContainer && descriptionText && carouselSlides.length > 0) {
+    const observerOptions = {
+        root: carouselContainer,
+        threshold: 0.6 // Trigger when 60% of the slide is visible
+    };
+
+    const slideObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const index = parseInt(entry.target.getAttribute('data-index'));
+
+                if (!isNaN(index) && carouselDescriptions[index]) {
+                    // Fade out
+                    descriptionText.classList.add('fading');
+
+                    setTimeout(() => {
+                        // Update text
+                        descriptionText.textContent = carouselDescriptions[index];
+                        // Fade in
+                        descriptionText.classList.remove('fading');
+                    }, 300); // Match CSS transition duration
+                }
+            }
+        });
+    }, observerOptions);
+
+    carouselSlides.forEach(slide => slideObserver.observe(slide));
+}
+
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
     // Initial cart count update
