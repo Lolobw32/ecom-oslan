@@ -933,12 +933,16 @@ ul {
     background-color: transparent;
 }
 
-.form-input:focus~.floating-label-text,
-.form-input:not(:placeholder-shown)~.floating-label-text {
-    top: 12px;
+.form-input:focus~.floating-label-text {
+    top: 8px;
     transform: translateY(0);
     font-size: var(--font-size-xs);
     color: var(--color-text-light);
+}
+
+.form-input:not(:placeholder-shown)~.floating-label-text {
+    opacity: 0;
+    visibility: hidden;
 }
 
 .clear-input,
