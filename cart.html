@@ -102,6 +102,205 @@
         </button>
     </div>
 
+    <!-- Checkout Popup Overlay -->
+    <div class="checkout-popup-overlay" id="checkoutPopupOverlay"></div>
+
+    <!-- Checkout Popup -->
+    <div class="checkout-popup" id="checkoutPopup">
+        <!-- Popup Header -->
+        <div class="checkout-popup-header">
+            <button class="checkout-popup-close" id="checkoutPopupClose" aria-label="Fermer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <h2 class="checkout-popup-title">Finaliser la commande</h2>
+        </div>
+
+        <!-- Steps Indicator -->
+        <div class="checkout-steps">
+            <div class="checkout-step active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-label">Identité</span>
+            </div>
+            <div class="checkout-step" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-label">Adresse</span>
+            </div>
+            <div class="checkout-step" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-label">Paiement</span>
+            </div>
+        </div>
+
+        <!-- Step Contents -->
+        <div class="checkout-step-contents">
+            <!-- Step 1: Personal Info -->
+            <div class="checkout-step-content active" id="checkoutStep1">
+                <div class="step-form">
+                    <div class="input-group floating-label">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input type="text" id="checkoutFirstName" class="form-input" placeholder=" " required>
+                        <label for="checkoutFirstName" class="floating-label-text">Prénom</label>
+                    </div>
+                    <div class="input-group floating-label">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <input type="text" id="checkoutLastName" class="form-input" placeholder=" " required>
+                        <label for="checkoutLastName" class="floating-label-text">Nom</label>
+                    </div>
+                    <div class="input-group floating-label">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z">
+                                </path>
+                            </svg>
+                        </div>
+                        <input type="tel" id="checkoutPhone" class="form-input" placeholder=" " required>
+                        <label for="checkoutPhone" class="floating-label-text">Téléphone</label>
+                    </div>
+                    <div class="input-group floating-label">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                                <path d="M3 7l9 6 9-6"></path>
+                            </svg>
+                        </div>
+                        <input type="email" id="checkoutEmail" class="form-input" placeholder=" " required>
+                        <label for="checkoutEmail" class="floating-label-text">Email</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Address -->
+            <div class="checkout-step-content" id="checkoutStep2">
+                <!-- Mini Map -->
+                <div class="checkout-map-container">
+                    <div id="checkoutMap" class="checkout-map"></div>
+                    <p class="map-hint">La carte affichera votre adresse</p>
+                </div>
+                <div class="step-form">
+                    <div class="input-group floating-label">
+                        <div class="input-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <input type="text" id="checkoutAddress" class="form-input" placeholder=" " required>
+                        <label for="checkoutAddress" class="floating-label-text">Adresse (rue et numéro)</label>
+                    </div>
+                    <div class="form-row">
+                        <div class="input-group floating-label">
+                            <input type="text" id="checkoutCity" class="form-input" placeholder=" " required>
+                            <label for="checkoutCity" class="floating-label-text">Ville</label>
+                        </div>
+                        <div class="input-group floating-label">
+                            <input type="text" id="checkoutZip" class="form-input" placeholder=" " required>
+                            <label for="checkoutZip" class="floating-label-text">Code postal</label>
+                        </div>
+                    </div>
+                    <div class="input-group floating-label">
+                        <input type="text" id="checkoutCountry" class="form-input" placeholder=" " value="France"
+                            required>
+                        <label for="checkoutCountry" class="floating-label-text">Pays</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Payment -->
+            <div class="checkout-step-content" id="checkoutStep3">
+                <div class="step-form">
+                    <h3 class="payment-title">Choisissez votre mode de paiement</h3>
+                    <div class="payment-methods">
+                        <label class="payment-method selected">
+                            <input type="radio" name="paymentMethod" value="card" checked>
+                            <div class="payment-method-content">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
+                                <span>Carte bancaire</span>
+                            </div>
+                            <span class="payment-check">✓</span>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="paymentMethod" value="paypal">
+                            <div class="payment-method-content">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.769.769 0 0 1 .759-.648h6.591c2.185 0 3.944.476 5.163 1.394.606.457 1.086 1.025 1.434 1.694.363.698.54 1.5.534 2.394-.006.859-.161 1.771-.466 2.715-.295.918-.713 1.76-1.247 2.502a6.55 6.55 0 0 1-1.92 1.793c-.75.457-1.612.804-2.563 1.032-.925.222-1.958.335-3.066.335H8.03a.769.769 0 0 0-.759.648l-.195 1.236z" />
+                                </svg>
+                                <span>PayPal</span>
+                            </div>
+                            <span class="payment-check">✓</span>
+                        </label>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="checkout-summary">
+                        <h4>Récapitulatif</h4>
+                        <div class="summary-line">
+                            <span>Sous-total</span>
+                            <span id="checkoutSubtotal">0€</span>
+                        </div>
+                        <div class="summary-line">
+                            <span>Livraison</span>
+                            <span id="checkoutShipping">Gratuit</span>
+                        </div>
+                        <div class="summary-line total">
+                            <span>Total</span>
+                            <span id="checkoutFinalTotal">0€</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="checkout-nav">
+            <button class="checkout-nav-btn prev hidden" id="checkoutPrevBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Précédent
+            </button>
+            <button class="checkout-nav-btn next" id="checkoutNextBtn">
+                Suivant
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </button>
+            <button class="checkout-nav-btn confirm hidden" id="checkoutConfirmBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Confirmer la commande
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaflet CSS & JS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Supabase & Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>

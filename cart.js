@@ -255,38 +255,295 @@ if (backBtn) {
     });
 }
 
-// ===== Checkout =====
+// ===== Checkout Popup =====
+const checkoutPopupOverlay = document.getElementById('checkoutPopupOverlay');
+const checkoutPopup = document.getElementById('checkoutPopup');
+const checkoutPopupClose = document.getElementById('checkoutPopupClose');
+const checkoutPrevBtn = document.getElementById('checkoutPrevBtn');
+const checkoutNextBtn = document.getElementById('checkoutNextBtn');
+const checkoutConfirmBtn = document.getElementById('checkoutConfirmBtn');
+const checkoutSteps = document.querySelectorAll('.checkout-step');
+const checkoutStepContents = document.querySelectorAll('.checkout-step-content');
+
+let currentStep = 1;
+let checkoutMap = null;
+let checkoutMarker = null;
+
+// Open checkout popup
 if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', async () => {
+    checkoutBtn.addEventListener('click', () => {
         const cart = getCart();
         if (cart.length > 0) {
-            checkoutBtn.disabled = true;
-            checkoutBtn.textContent = 'Traitement...';
+            openCheckoutPopup();
+        }
+    });
+}
 
-            // Collect basic customer info (mocked for now, in real app would be form)
-            const customerInfo = {
-                address: "Adresse de test",
-                city: "Paris",
-                zip: "75000"
-            };
+function openCheckoutPopup() {
+    currentStep = 1;
+    updateStepUI();
+    updateCheckoutSummary();
 
-            if (window.oslanAnalytics) {
-                const success = await window.oslanAnalytics.createOrder(cart, customerInfo);
+    checkoutPopupOverlay.classList.add('active');
+    checkoutPopup.classList.add('active');
+    document.body.style.overflow = 'hidden';
 
-                if (success) {
-                    alert('Commande enregistrée avec succès ! Merci de votre achat OSLAN.');
-                    localStorage.removeItem('cart');
-                    localStorage.removeItem('cartItems');
-                    window.location.href = 'index.html'; // Redirect to success page normally
-                } else {
-                    alert('Une erreur est survenue. Veuillez réessayer.');
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.textContent = 'Paiement';
-                }
-            } else {
-                console.error('Analytics script not loaded');
-                alert('Erreur technique. Veuillez recharger la page.');
+    // Initialize map when step 2 is shown
+    setTimeout(() => {
+        if (!checkoutMap) {
+            initCheckoutMap();
+        }
+    }, 500);
+}
+
+function closeCheckoutPopup() {
+    checkoutPopupOverlay.classList.remove('active');
+    checkoutPopup.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Close popup events
+if (checkoutPopupClose) {
+    checkoutPopupClose.addEventListener('click', closeCheckoutPopup);
+}
+
+if (checkoutPopupOverlay) {
+    checkoutPopupOverlay.addEventListener('click', closeCheckoutPopup);
+}
+
+// Step navigation
+function updateStepUI() {
+    // Update step indicators
+    checkoutSteps.forEach((step, index) => {
+        const stepNum = index + 1;
+        step.classList.remove('active', 'completed');
+        if (stepNum === currentStep) {
+            step.classList.add('active');
+        } else if (stepNum < currentStep) {
+            step.classList.add('completed');
+        }
+    });
+
+    // Update step contents
+    checkoutStepContents.forEach((content, index) => {
+        const stepNum = index + 1;
+        content.classList.toggle('active', stepNum === currentStep);
+    });
+
+    // Update navigation buttons
+    checkoutPrevBtn.classList.toggle('hidden', currentStep === 1);
+    checkoutNextBtn.classList.toggle('hidden', currentStep === 3);
+    checkoutConfirmBtn.classList.toggle('hidden', currentStep !== 3);
+}
+
+function validateCurrentStep() {
+    if (currentStep === 1) {
+        const firstName = document.getElementById('checkoutFirstName').value.trim();
+        const lastName = document.getElementById('checkoutLastName').value.trim();
+        const phone = document.getElementById('checkoutPhone').value.trim();
+        const email = document.getElementById('checkoutEmail').value.trim();
+
+        if (!firstName || !lastName || !phone || !email) {
+            alert('Veuillez remplir tous les champs.');
+            return false;
+        }
+        if (!email.includes('@')) {
+            alert('Veuillez entrer une adresse email valide.');
+            return false;
+        }
+        return true;
+    }
+
+    if (currentStep === 2) {
+        const address = document.getElementById('checkoutAddress').value.trim();
+        const city = document.getElementById('checkoutCity').value.trim();
+        const zip = document.getElementById('checkoutZip').value.trim();
+        const country = document.getElementById('checkoutCountry').value.trim();
+
+        if (!address || !city || !zip || !country) {
+            alert('Veuillez remplir tous les champs d\'adresse.');
+            return false;
+        }
+        return true;
+    }
+
+    return true;
+}
+
+if (checkoutNextBtn) {
+    checkoutNextBtn.addEventListener('click', () => {
+        if (validateCurrentStep()) {
+            currentStep++;
+            updateStepUI();
+
+            // Update map when going to step 2
+            if (currentStep === 2) {
+                setTimeout(updateMapLocation, 300);
             }
+        }
+    });
+}
+
+if (checkoutPrevBtn) {
+    checkoutPrevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepUI();
+        }
+    });
+}
+
+// Payment method selection
+document.querySelectorAll('.payment-method').forEach(method => {
+    method.addEventListener('click', () => {
+        document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+        method.classList.add('selected');
+        method.querySelector('input[type="radio"]').checked = true;
+    });
+});
+
+// Update checkout summary
+function updateCheckoutSummary() {
+    const cart = getCart();
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        const product = productData[item.productId];
+        if (product) {
+            subtotal += product.price * item.quantity;
+        }
+    });
+
+    let discount = 0;
+    if (appliedPromo && promoCodes[appliedPromo]) {
+        discount = subtotal * promoCodes[appliedPromo];
+    }
+
+    const shippingFee = subtotal >= 50 ? 0 : 4.99;
+    const total = subtotal - discount + shippingFee;
+
+    const checkoutSubtotal = document.getElementById('checkoutSubtotal');
+    const checkoutShipping = document.getElementById('checkoutShipping');
+    const checkoutFinalTotal = document.getElementById('checkoutFinalTotal');
+
+    if (checkoutSubtotal) checkoutSubtotal.textContent = `${subtotal.toFixed(2)}€`;
+    if (checkoutShipping) checkoutShipping.textContent = shippingFee === 0 ? 'Gratuit' : `${shippingFee.toFixed(2)}€`;
+    if (checkoutFinalTotal) checkoutFinalTotal.textContent = `${total.toFixed(2)}€`;
+}
+
+// Initialize Leaflet Map
+function initCheckoutMap() {
+    const mapContainer = document.getElementById('checkoutMap');
+    if (!mapContainer || typeof L === 'undefined') return;
+
+    // Default position (Paris)
+    checkoutMap = L.map('checkoutMap').setView([48.8566, 2.3522], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(checkoutMap);
+
+    mapContainer.classList.add('loaded');
+}
+
+// Update map based on address
+function updateMapLocation() {
+    const address = document.getElementById('checkoutAddress').value.trim();
+    const city = document.getElementById('checkoutCity').value.trim();
+    const zip = document.getElementById('checkoutZip').value.trim();
+    const country = document.getElementById('checkoutCountry').value.trim();
+
+    if (!address && !city) return;
+
+    const fullAddress = `${address}, ${zip} ${city}, ${country}`;
+
+    // Geocode using Nominatim (OpenStreetMap)
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+
+                if (checkoutMap) {
+                    checkoutMap.setView([lat, lon], 15);
+
+                    if (checkoutMarker) {
+                        checkoutMarker.setLatLng([lat, lon]);
+                    } else {
+                        checkoutMarker = L.marker([lat, lon]).addTo(checkoutMap);
+                    }
+
+                    document.getElementById('checkoutMap').classList.add('loaded');
+                }
+            }
+        })
+        .catch(err => console.error('Geocoding error:', err));
+}
+
+// Debounced address change handler
+let addressTimeout = null;
+['checkoutAddress', 'checkoutCity', 'checkoutZip', 'checkoutCountry'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+        input.addEventListener('input', () => {
+            clearTimeout(addressTimeout);
+            addressTimeout = setTimeout(updateMapLocation, 800);
+        });
+    }
+});
+
+// Confirm order
+if (checkoutConfirmBtn) {
+    checkoutConfirmBtn.addEventListener('click', async () => {
+        const cart = getCart();
+        if (cart.length === 0) return;
+
+        checkoutConfirmBtn.disabled = true;
+        checkoutConfirmBtn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"></circle>
+            </svg>
+            Traitement...
+        `;
+
+        // Collect customer info
+        const customerInfo = {
+            firstName: document.getElementById('checkoutFirstName').value.trim(),
+            lastName: document.getElementById('checkoutLastName').value.trim(),
+            phone: document.getElementById('checkoutPhone').value.trim(),
+            email: document.getElementById('checkoutEmail').value.trim(),
+            address: document.getElementById('checkoutAddress').value.trim(),
+            city: document.getElementById('checkoutCity').value.trim(),
+            zip: document.getElementById('checkoutZip').value.trim(),
+            country: document.getElementById('checkoutCountry').value.trim(),
+            paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card'
+        };
+
+        if (window.oslanAnalytics) {
+            const success = await window.oslanAnalytics.createOrder(cart, customerInfo);
+
+            if (success) {
+                closeCheckoutPopup();
+                createCartConfetti();
+                alert('🎉 Commande confirmée ! Merci de votre achat OSLAN.');
+                localStorage.removeItem('cart');
+                localStorage.removeItem('cartItems');
+                window.location.href = 'index.html';
+            } else {
+                alert('Une erreur est survenue. Veuillez réessayer.');
+                checkoutConfirmBtn.disabled = false;
+                checkoutConfirmBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Confirmer la commande
+                `;
+            }
+        } else {
+            console.error('Analytics script not loaded');
+            alert('Erreur technique. Veuillez recharger la page.');
+            checkoutConfirmBtn.disabled = false;
         }
     });
 }

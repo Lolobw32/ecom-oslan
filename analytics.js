@@ -132,6 +132,27 @@ async function createOrder(cartItems, customerInfo) {
                 .insert(orderItems);
 
             if (itemsError) throw itemsError;
+
+            // Update Stock for each item
+            for (const item of orderItems) {
+                // Call RPC to safely decrement stock
+                // Alternatively, direct update if RLS allows, but RPC is safer for concurrency
+                // For now, simpler direct update:
+
+                const { data: currentProd } = await client
+                    .from('products')
+                    .select('stock_quantity')
+                    .eq('id', item.product_id)
+                    .single();
+
+                if (currentProd) {
+                    const newStock = Math.max(0, currentProd.stock_quantity - item.quantity);
+                    await client
+                        .from('products')
+                        .update({ stock_quantity: newStock })
+                        .eq('id', item.product_id);
+                }
+            }
         }
 
         return true;
