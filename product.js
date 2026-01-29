@@ -28,22 +28,25 @@ if (document.body.classList.contains('product-detail-page')) {
     const urlParams = new URLSearchParams(window.location.search);
     const productSlug = urlParams.get('id') || 'tshirt-blanc';
 
-    // Store current product data
-    let currentProduct = null;
+    // Store current product data - Initialize with DOM data (Fallback)
+    let currentProduct = {
+        id: productSlug, // Fallback ID
+        title: productTitle ? productTitle.textContent : 'Produit Sans Nom',
+        price: currentPrice ? parseFloat(currentPrice.textContent.replace('€', '').trim()) : 0,
+        image_url: productImg1 ? productImg1.src : 'assets/logo.png',
+        stock_quantity: 100, // Default generous stock if DB fails
+        is_preorder: false
+    };
 
-    // ===== Fetch Product Data from Supabase =====
+    // Initialize UI immediately (Don't wait for DB)
+    // updateUI(currentProduct); // Optional, HTML is already there
+
+    // ===== Fetch Product Data from Supabase (Background Sync) =====
     async function fetchProductData() {
         const client = getSupabaseClient();
-        if (!client) {
-            console.error('Supabase client not available');
-            return;
-        }
+        if (!client) return;
 
         try {
-            // We search by matching the slug to the image_url or title roughly
-            // Ideally, we should add a 'slug' column to the database in the future
-            // For now, we do a text search match
-
             // Construct search term from slug (e.g. 'tshirt-blanc' -> 'blanc')
             const searchTerm = productSlug.includes('blanc') ? 'Blanc' : 'Noir';
             const genderTerm = productSlug.includes('femme') ? 'Femme' : 'Homme';
@@ -53,20 +56,36 @@ if (document.body.classList.contains('product-detail-page')) {
                 .from('products')
                 .select('*')
                 .ilike('title', `%${searchTerm}%`)
-                .eq('category', genderTerm) // Assuming migration set category correctly
+                .eq('category', genderTerm)
                 .limit(1);
 
-            if (error) throw error;
+            if (error) {
+                console.warn('DB Fetch silent error:', error);
+                return; // Keep using DOM data
+            }
 
             if (products && products.length > 0) {
-                currentProduct = products[0];
-                updateUI(currentProduct);
+                const dbProduct = products[0];
+                // Merge DB info into currentProduct, but prioritising DB for critical logic
+                currentProduct = {
+                    ...currentProduct,
+                    id: dbProduct.id, // Important: Use Real UUID
+                    stock_quantity: dbProduct.stock_quantity,
+                    is_preorder: dbProduct.is_preorder,
+                    price: dbProduct.price // Sync price
+                    // We don't overwrite Title/Desc/Image to avoid "flicker" if DB is slightly different
+                };
 
-                // Subscribe to Realtime changes for this product (stock updates)
-                subscribeToProductUpdates(currentProduct.id);
+                // Update UI for Dynamic parts only
+                if (currentPrice) currentPrice.textContent = `${dbProduct.price.toFixed(2)}€`;
+                checkStock(dbProduct.stock_quantity, dbProduct.is_preorder);
+
+                // Subscribe to Realtime changes
+                subscribeToProductUpdates(dbProduct.id);
             } else {
-                console.warn('Product not found in DB', productSlug);
-                // Fallback to hardcoded if DB fetch fails (handled by existing HTML structure mostly)
+                console.log('Product not linked in DB yet, using legacy mode.');
+                // Enable purchase anyway
+                checkStock(100, false);
             }
 
         } catch (err) {
@@ -74,83 +93,40 @@ if (document.body.classList.contains('product-detail-page')) {
         }
     }
 
-    // ===== Update UI with Real Data =====
-    function updateUI(product) {
-        if (!product) return;
-
-        // Update basic info
-        productTitle.textContent = product.title;
-        // Subtitle logic (can be added to DB later, for now inferred)
-        productSubtitle.textContent = product.category === 'Homme'
-            ? 'Collection Homme - Force et style.'
-            : 'Collection Femme - Élégance et modernité.';
-
-        currentPrice.textContent = `${product.price.toFixed(2)}€`;
-        // Mock original price (e.g. +20%)
-        originalPrice.textContent = `${(product.price * 1.2).toFixed(2)}€`;
-
-        descriptionText.textContent = product.description;
-
-        // Update Images
-        if (product.image_url) {
-            productImg1.src = product.image_url;
-            productImg1.alt = product.title;
-            // For gallery, we might reuse same image or have array in DB later
-            // For now keeping existing secondary images logic if avail or using main
-        }
-
-        // ===== STOCK MANAGEMENT & PRE-ORDER =====
-        checkStock(product.stock_quantity, product.is_preorder);
-    }
+    // ===== Update UI (Reduced responsibility - mostly handled by HTML) =====
+    // checkStock logic remains same but is now called after DB sync or fallback
 
     function checkStock(quantity, isPreorder) {
-        const isOutOfStock = quantity <= 0;
-
-        if (isPreorder) {
-            // Pre-order mode: Always enabled, distinct style
-            if (addToCartBtn) {
+        if (addToCartBtn) {
+            if (isPreorder) {
+                // PRE-ORDER MODE
                 addToCartBtn.disabled = false;
-                addToCartBtn.textContent = 'Pré-commander';
-                addToCartBtn.style.backgroundColor = '#d97706'; // Amber 600 for visibility
-                addToCartBtn.style.color = '#fff';
-                addToCartBtn.style.cursor = 'pointer';
-            }
-            if (buyNowBtn) {
-                buyNowBtn.disabled = false;
-                buyNowBtn.style.display = 'inline-block';
-                buyNowBtn.textContent = 'Pré-commander maintenant';
-            }
-        } else if (isOutOfStock) {
-            // Out of stock mode
-            if (addToCartBtn) {
-                addToCartBtn.disabled = true;
-                addToCartBtn.textContent = 'Rupture de stock';
-                addToCartBtn.style.backgroundColor = '#ccc';
-                addToCartBtn.style.color = '#666';
-                addToCartBtn.style.cursor = 'not-allowed';
-            }
-            if (buyNowBtn) {
-                buyNowBtn.disabled = true;
-                buyNowBtn.style.display = 'none';
-            }
-        } else {
-            // Normal stock mode
-            if (addToCartBtn) {
+                addToCartBtn.textContent = 'Précommander';
+                addToCartBtn.classList.add('preorder-btn'); // Optional styling hook
+
+                // Add badge if needed
+                if (currentPrice && !document.querySelector('.preorder-badge')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'status-badge warning preorder-badge';
+                    badge.textContent = 'Pré-commande';
+                    badge.style.marginLeft = '10px';
+                    badge.style.fontSize = '0.8rem';
+                    currentPrice.parentElement.appendChild(badge);
+                }
+            } else if (quantity > 0) {
+                // IN STOCK
                 addToCartBtn.disabled = false;
                 addToCartBtn.textContent = 'Ajouter au panier';
-                addToCartBtn.style.backgroundColor = ''; // Reset to CSS default
-                addToCartBtn.style.color = '';
-                addToCartBtn.style.cursor = 'pointer';
-            }
-            if (buyNowBtn) {
-                buyNowBtn.disabled = false;
-                buyNowBtn.style.display = 'inline-block';
-                buyNowBtn.textContent = 'Acheter maintenant';
-            }
-
-            // Low stock warning (optional)
-            if (quantity < 5) {
-                // Could add a badge here "Plus que X en stock"
+                addToCartBtn.classList.remove('preorder-btn');
+                const badge = document.querySelector('.preorder-badge');
+                if (badge) badge.remove();
+            } else {
+                // OUT OF STOCK
+                addToCartBtn.disabled = true;
+                addToCartBtn.textContent = 'Rupture de stock';
+                addToCartBtn.classList.remove('preorder-btn');
+                const badge = document.querySelector('.preorder-badge');
+                if (badge) badge.remove();
             }
         }
     }
@@ -158,6 +134,7 @@ if (document.body.classList.contains('product-detail-page')) {
     // ===== Realtime Updates =====
     function subscribeToProductUpdates(productId) {
         const client = getSupabaseClient();
+        if (!client) return;
 
         client
             .channel(`product-${productId}`)
@@ -168,12 +145,14 @@ if (document.body.classList.contains('product-detail-page')) {
                 filter: `id=eq.${productId}`
             }, (payload) => {
                 const updatedProduct = payload.new;
-                currentProduct = updatedProduct;
 
-                // Update specific fields that might change live
-                productTitle.textContent = updatedProduct.title;
-                descriptionText.textContent = updatedProduct.description;
-                currentPrice.textContent = `${updatedProduct.price.toFixed(2)}€`;
+                // Update critical data
+                currentProduct.stock_quantity = updatedProduct.stock_quantity;
+                currentProduct.is_preorder = updatedProduct.is_preorder;
+                currentProduct.price = updatedProduct.price;
+
+                // Update UI elements
+                if (currentPrice) currentPrice.textContent = `${updatedProduct.price.toFixed(2)}€`;
 
                 // Live Stock & Pre-order Update
                 checkStock(updatedProduct.stock_quantity, updatedProduct.is_preorder);
@@ -209,12 +188,6 @@ if (document.body.classList.contains('product-detail-page')) {
     let currentSlide = 0;
     const slides = galleryTrack ? galleryTrack.querySelectorAll('.gallery-slide') : [];
     const dots = galleryDots ? galleryDots.querySelectorAll('.dot') : [];
-    const totalSlides = slides.length;
-    const galleryContainer = document.getElementById('galleryContainer');
-
-    // ... (Keeping gallery swipe logic as is) ...
-    // Note: Re-inserting the gallery logic briefly to minimalize diff size/complexity issues
-    // Just assume standard slider logic here
 
     function updateGallery(animate = true) {
         if (galleryTrack) {
@@ -274,17 +247,27 @@ if (document.body.classList.contains('product-detail-page')) {
                     image: currentProduct.image_url,
                     price: currentProduct.price,
                     size: size,
-                    quantity: 1
+                    quantity: 1,
+                    isPreorder: currentProduct.is_preorder // Store pre-order status in cart
                 });
             }
 
             saveCart(cart);
 
-            // Animation/Confetti
-            // ... (keep existing animation logic) ...
+            // Animation/Confetti & Button Feedback
+
+            // 1. Button Change
+            const originalText = addToCartBtn.textContent;
             addToCartBtn.textContent = 'Ajouté !';
+            addToCartBtn.classList.add('success');
+
+            // 2. Confetti
+            createConfetti();
+
             setTimeout(() => {
-                if (currentProduct.stock_quantity > 0) addToCartBtn.textContent = 'Ajouter au panier';
+                addToCartBtn.classList.remove('success');
+                // Restore correct text based on state
+                checkStock(currentProduct.stock_quantity, currentProduct.is_preorder);
             }, 2000);
         });
     }
@@ -296,6 +279,36 @@ if (document.body.classList.contains('product-detail-page')) {
                 setTimeout(() => window.location.href = 'cart.html', 100);
             }
         });
+    }
+
+    function createConfetti() {
+        const colors = ['#000000', '#333333', '#666666'];
+        for (let i = 0; i < 30; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.cssText = `
+                position: fixed;
+                width: 8px; height: 8px;
+                background: ${colors[Math.floor(Math.random() * colors.length)]};
+                top: 50%; left: 50%;
+                pointer-events: none; opacity: 1;
+                transform: translate(-50%, -50%);
+                border-radius: 50%;
+                z-index: 9999;
+                transition: all 1s ease-out;
+            `;
+            document.body.appendChild(confetti);
+
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 50 + Math.random() * 100;
+            const x = Math.cos(angle) * velocity;
+            const y = Math.sin(angle) * velocity;
+
+            requestAnimationFrame(() => {
+                confetti.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(0)`;
+                confetti.style.opacity = '0';
+            });
+            setTimeout(() => confetti.remove(), 1000);
+        }
     }
 
     // ===== Initialize =====

@@ -20,7 +20,7 @@ let trafficChart = null;
 
 // ===== AUTHENTICATION & ACCESS CONTROL =====
 async function checkAdminAccess() {
-    // Vérifier la session admin dans localStorage
+    // 1. Check local admin session marker (Legacy)
     const adminSession = localStorage.getItem('oslan_admin_session');
 
     if (!adminSession) {
@@ -38,7 +38,7 @@ async function checkAdminAccess() {
             return false;
         }
 
-        // Vérifier que la session n'est pas trop ancienne (24h)
+        // 2. Check Session Expiry (24h)
         const loginTime = new Date(session.loginTime);
         const now = new Date();
         const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
@@ -48,6 +48,21 @@ async function checkAdminAccess() {
             localStorage.removeItem('oslan_admin_session');
             redirectToLogin();
             return false;
+        }
+
+        // 3. CRITICAL: Check Actual Supabase Auth Session
+        // RLS policies depend on this, not just localStorage
+        const client = getSupabaseClient();
+        if (client) {
+            const { data: { session: supabaseSession }, error } = await client.auth.getSession();
+
+            if (error || !supabaseSession) {
+                console.warn('Supabase Auth missing despite Admin Session. Forcing re-login.');
+                alert('Votre session sécurisée a expiré. Veuillez vous reconnecter pour accéder aux données.');
+                localStorage.removeItem('oslan_admin_session');
+                redirectToLogin();
+                return false;
+            }
         }
 
         // Update UI with admin info
@@ -339,7 +354,7 @@ function renderProductsTable(products) {
                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
             </td>
             <td><strong>${product.title}</strong></td>
-            <td>${product.price.toFixed(2)} €</td>
+            <td>${product.price ? product.price.toFixed(2) : 0} €</td>
             <td>
                 <span class="stock-badge ${product.stock_quantity < 5 ? 'low' : ''}">
                     ${product.stock_quantity}
@@ -349,7 +364,7 @@ function renderProductsTable(products) {
                 <span class="status-badge ${product.is_active ? 'active' : 'inactive'}">
                     ${product.is_active ? 'Actif' : 'Inactif'}
                 </span>
-                ${product.is_preorder ? '<span class="status-badge warning" style="margin-left:4px">Pré-commande</span>' : ''}
+                ${product.is_preorder ? '<span class="status-badge warning" style="margin-left:4px; font-size:10px;">Pré-commande</span>' : ''}
             </td>
             <td>
                 <div class="admin-table-actions">
@@ -359,7 +374,22 @@ function renderProductsTable(products) {
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                         </svg>
                     </button>
-                    <button class="admin-btn-icon danger" onclick="deleteProduct('${product.id}')" title="Supprimer">
+                    <button class="admin-btn-icon danger" onclick="toggleProductStatus('${product.id}', ${product.is_active})" title="${product.is_active ? 'Suspendre' : 'Activer'}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                           ${product.is_active
+            ? '<path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line>' // Power icon (Suspend)
+            : '<path d="M5 12h14"></path><path d="M12 5v14"></path>'} // Plus icon (Activate/rest) - actually let's use check circle
+                             ${product.is_active
+            ? ''
+            : '<polyline points="20 6 9 17 4 12"></polyline>'} 
+                        </svg>
+                        ${product.is_active
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>' // Stop
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' // Check
+        }
+                    </button>
+                    <!-- Old Delete Button removed to favor Suspend, or kept as hard delete? User asked for Suspend (Soft Delete). I'll keep hard delete but make it less prominent or remove if Suspend is enough. I will keep Hard Delete for cleanup but Suspend is primary -->
+                    <button class="admin-btn-icon" onclick="deleteProduct('${product.id}')" title="Supprimer définitivement" style="opacity:0.5">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -399,26 +429,56 @@ function initProductModal() {
 
 function ensurePreorderField() {
     // Check if preorder field exists in form, if not add it
-    let container = document.getElementById('preorderContainer');
+    let container = document.getElementById('productOptionsContainer');
     if (!container) {
         const form = document.getElementById('productForm');
         // Insert before submit buttons
-        const btnGroup = form.querySelector('.form-actions');
+        const btnGroup = form.querySelector('.form-actions') || form.querySelector('.admin-modal-actions');
 
         container = document.createElement('div');
-        container.id = 'preorderContainer';
+        container.id = 'productOptionsContainer';
         container.className = 'form-group checkbox-group';
         container.style.marginBottom = '20px';
         container.style.display = 'flex';
-        container.style.alignItems = 'center';
+        container.style.flexDirection = 'column';
         container.style.gap = '10px';
 
         container.innerHTML = `
-            <input type="checkbox" id="productPreorder" name="is_preorder" style="width:auto; margin:0;">
-            <label for="productPreorder" style="margin:0; font-weight:500;">Activer la Pré-commande</label>
+            <div style="display:flex; align-items:center; gap:10px">
+                <input type="checkbox" id="productPreorder" name="is_preorder" style="width:auto; margin:0;">
+                <label for="productPreorder" style="margin:0; font-weight:500; cursor:pointer">Activer la Pré-commande</label>
+            </div>
+             <div style="display:flex; align-items:center; gap:10px">
+                <input type="checkbox" id="productActive" name="is_active" style="width:auto; margin:0;" checked>
+                <label for="productActive" style="margin:0; font-weight:500; cursor:pointer">Produit Actif (Visible sur le site)</label>
+            </div>
         `;
 
         form.insertBefore(container, btnGroup);
+    }
+}
+
+// New function for toggling status (suspended/soft delete)
+async function toggleProductStatus(productId, currentStatus) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    // Toggle
+    const newStatus = !currentStatus;
+    const actionName = newStatus ? 'activé' : 'suspendu';
+
+    try {
+        const { error } = await client
+            .from('products')
+            .update({ is_active: newStatus })
+            .eq('id', productId);
+
+        if (error) throw error;
+
+        loadProducts(); // Reload list
+    } catch (error) {
+        console.error('Error toggling status:', error);
+        alert('Erreur lors du changement de statut');
     }
 }
 
@@ -450,6 +510,11 @@ async function editProduct(productId) {
             preorderCheckbox.checked = !!product.is_preorder;
         }
 
+        const activeCheckbox = document.getElementById('productActive');
+        if (activeCheckbox) {
+            activeCheckbox.checked = !!product.is_active;
+        }
+
         document.getElementById('productModal').classList.add('active');
     } catch (error) {
         console.error('Error loading product:', error);
@@ -469,7 +534,11 @@ async function saveProduct() {
         image_url: document.getElementById('productImage').value,
         category: document.getElementById('productCategory').value,
         // Safe check for preorder field
-        is_preorder: document.getElementById('productPreorder') ? document.getElementById('productPreorder').checked : false
+        is_preorder: document.getElementById('productPreorder') ? document.getElementById('productPreorder').checked : false,
+        // Active status (Default true for new, checkbox for edit if we add it, or keep existing)
+        // For now we default to true on create. 
+        // We will add an 'isActive' checkbox to the modal to allow "Suspending"
+        is_active: document.getElementById('productActive') ? document.getElementById('productActive').checked : true
     };
 
     try {
@@ -575,7 +644,7 @@ function renderOrdersTable(orders) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
-                    Aucune commande trouvée.
+                    Aucune commande trouvée. Si vous pensez qu'il s'agit d'une erreur, vérifiez que vous êtes bien connecté.
                 </td>
             </tr>
         `;
