@@ -115,11 +115,11 @@
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
-            <h2 class="checkout-popup-title">Finaliser la commande</h2>
+            <h2 class="checkout-popup-title" id="checkoutPopupTitle">Finaliser la commande</h2>
         </div>
 
-        <!-- Steps Indicator -->
-        <div class="checkout-steps">
+        <!-- Steps Indicator (hidden when on login step) -->
+        <div class="checkout-steps" id="checkoutStepsIndicator">
             <div class="checkout-step active" data-step="1">
                 <span class="step-number">1</span>
                 <span class="step-label">Identité</span>
@@ -136,8 +136,104 @@
 
         <!-- Step Contents -->
         <div class="checkout-step-contents">
+            <!-- Step 0: Login (shown if not authenticated) -->
+            <div class="checkout-step-content" id="checkoutStepLogin">
+                <div class="login-prompt">
+                    <div class="login-prompt-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="login-prompt-title">Connectez-vous pour continuer</h3>
+                    <p class="login-prompt-text">Connectez-vous ou créez un compte pour passer votre commande</p>
+                </div>
+
+                <!-- Login Form -->
+                <div class="checkout-auth-form" id="checkoutLoginForm">
+                    <div class="step-form">
+                        <div class="input-group floating-label">
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                                    <path d="M3 7l9 6 9-6"></path>
+                                </svg>
+                            </div>
+                            <input type="email" id="authEmail" class="form-input" placeholder=" " required>
+                            <label for="authEmail" class="floating-label-text">Email</label>
+                        </div>
+                        <div class="input-group floating-label">
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </div>
+                            <input type="password" id="authPassword" class="form-input" placeholder=" " required>
+                            <label for="authPassword" class="floating-label-text">Mot de passe</label>
+                        </div>
+                        <p class="auth-error" id="authError"></p>
+                        <button type="button" class="submit-btn" id="authLoginBtn">Se connecter</button>
+                        <div class="auth-switch">
+                            <span>Pas de compte ?</span>
+                            <button type="button" class="auth-switch-btn" id="showSignupBtn">Créer un compte</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signup Form (hidden by default) -->
+                <div class="checkout-auth-form hidden" id="checkoutSignupForm">
+                    <div class="step-form">
+                        <div class="input-group floating-label">
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
+                                    <path d="M3 7l9 6 9-6"></path>
+                                </svg>
+                            </div>
+                            <input type="email" id="signupEmail" class="form-input" placeholder=" " required>
+                            <label for="signupEmail" class="floating-label-text">Email</label>
+                        </div>
+                        <div class="input-group floating-label">
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </div>
+                            <input type="password" id="signupPassword" class="form-input" placeholder=" " required>
+                            <label for="signupPassword" class="floating-label-text">Mot de passe</label>
+                        </div>
+                        <div class="input-group floating-label">
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </div>
+                            <input type="password" id="signupPasswordConfirm" class="form-input" placeholder=" "
+                                required>
+                            <label for="signupPasswordConfirm" class="floating-label-text">Confirmer le mot de
+                                passe</label>
+                        </div>
+                        <p class="auth-error" id="signupError"></p>
+                        <button type="button" class="submit-btn" id="authSignupBtn">Créer mon compte</button>
+                        <div class="auth-switch">
+                            <span>Déjà un compte ?</span>
+                            <button type="button" class="auth-switch-btn" id="showLoginBtn">Se connecter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Step 1: Personal Info -->
-            <div class="checkout-step-content active" id="checkoutStep1">
+            <div class="checkout-step-content" id="checkoutStep1">
                 <div class="step-form">
                     <div class="input-group floating-label">
                         <div class="input-icon">

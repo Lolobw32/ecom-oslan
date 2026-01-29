@@ -3145,3 +3145,116 @@ ul {
 .checkout-nav-btn.hidden {
     display: none;
 }
+
+/* ===== Checkout Auth Styles ===== */
+.login-prompt {
+    text-align: center;
+    padding: var(--spacing-lg) 0;
+}
+
+.login-prompt-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-card-bg);
+    border-radius: 50%;
+    color: var(--color-text);
+}
+
+.login-prompt-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.login-prompt-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+.checkout-auth-form {
+    margin-top: var(--spacing-lg);
+}
+
+.checkout-auth-form.hidden {
+    display: none;
+}
+
+.auth-error {
+    color: #e53935;
+    font-size: var(--font-size-sm);
+    text-align: center;
+    min-height: 20px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.auth-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+.auth-switch-btn {
+    background: none;
+    border: none;
+    color: var(--color-text);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition-fast);
+}
+
+.auth-switch-btn:hover {
+    text-decoration: underline;
+}
+
+/* Hide steps indicator on login step */
+.checkout-steps.hidden {
+    display: none;
+}
+
+/* User greeting when logged in */
+.user-greeting {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background-color: var(--color-card-bg);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.user-greeting-avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-text);
+    color: var(--color-bg);
+    border-radius: 50%;
+    font-weight: 600;
+}
+
+.user-greeting-text {
+    flex: 1;
+}
+
+.user-greeting-text strong {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.user-greeting-text span {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+}

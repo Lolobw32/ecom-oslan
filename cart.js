@@ -264,23 +264,52 @@ const checkoutNextBtn = document.getElementById('checkoutNextBtn');
 const checkoutConfirmBtn = document.getElementById('checkoutConfirmBtn');
 const checkoutSteps = document.querySelectorAll('.checkout-step');
 const checkoutStepContents = document.querySelectorAll('.checkout-step-content');
+const checkoutStepsIndicator = document.getElementById('checkoutStepsIndicator');
+const checkoutPopupTitle = document.getElementById('checkoutPopupTitle');
+const checkoutStepLogin = document.getElementById('checkoutStepLogin');
 
-let currentStep = 1;
+// Auth elements
+const authLoginBtn = document.getElementById('authLoginBtn');
+const authSignupBtn = document.getElementById('authSignupBtn');
+const showSignupBtn = document.getElementById('showSignupBtn');
+const showLoginBtn = document.getElementById('showLoginBtn');
+const checkoutLoginForm = document.getElementById('checkoutLoginForm');
+const checkoutSignupForm = document.getElementById('checkoutSignupForm');
+
+let currentStep = 0; // 0 = login, 1-3 = checkout steps
+let isAuthenticated = false;
+let currentUser = null;
 let checkoutMap = null;
 let checkoutMarker = null;
 
 // Open checkout popup
 if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', () => {
+    checkoutBtn.addEventListener('click', async () => {
         const cart = getCart();
         if (cart.length > 0) {
-            openCheckoutPopup();
+            await openCheckoutPopup();
         }
     });
 }
 
-function openCheckoutPopup() {
-    currentStep = 1;
+async function openCheckoutPopup() {
+    // Check if user is authenticated
+    currentUser = await getCurrentUser();
+    isAuthenticated = currentUser !== null;
+
+    if (isAuthenticated) {
+        currentStep = 1;
+        // Pre-fill user email if available
+        const emailInput = document.getElementById('checkoutEmail');
+        if (emailInput && currentUser.email) {
+            emailInput.value = currentUser.email;
+        }
+        // Try to load saved profile data
+        await loadUserProfile();
+    } else {
+        currentStep = 0; // Show login step
+    }
+
     updateStepUI();
     updateCheckoutSummary();
 
@@ -288,12 +317,69 @@ function openCheckoutPopup() {
     checkoutPopup.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Initialize map when step 2 is shown
+    // Initialize map
     setTimeout(() => {
         if (!checkoutMap) {
             initCheckoutMap();
         }
     }, 500);
+}
+
+// Load user profile from Supabase
+async function loadUserProfile() {
+    if (!currentUser) return;
+
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+        const { data: profile } = await client
+            .from('profiles')
+            .select('first_name, last_name, phone, address, city, zip_code, country')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (profile) {
+            // Pre-fill form fields
+            if (profile.first_name) document.getElementById('checkoutFirstName').value = profile.first_name;
+            if (profile.last_name) document.getElementById('checkoutLastName').value = profile.last_name;
+            if (profile.phone) document.getElementById('checkoutPhone').value = profile.phone;
+            if (profile.address) document.getElementById('checkoutAddress').value = profile.address;
+            if (profile.city) document.getElementById('checkoutCity').value = profile.city;
+            if (profile.zip_code) document.getElementById('checkoutZip').value = profile.zip_code;
+            if (profile.country) document.getElementById('checkoutCountry').value = profile.country;
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+
+// Save user profile to Supabase
+async function saveUserProfile(customerInfo) {
+    if (!currentUser) return;
+
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+        const { error } = await client
+            .from('profiles')
+            .upsert({
+                id: currentUser.id,
+                first_name: customerInfo.firstName,
+                last_name: customerInfo.lastName,
+                phone: customerInfo.phone,
+                address: customerInfo.address,
+                city: customerInfo.city,
+                zip_code: customerInfo.zip,
+                country: customerInfo.country,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+
+        if (error) console.error('Error saving profile:', error);
+    } catch (error) {
+        console.error('Error saving profile:', error);
+    }
 }
 
 function closeCheckoutPopup() {
@@ -311,8 +397,152 @@ if (checkoutPopupOverlay) {
     checkoutPopupOverlay.addEventListener('click', closeCheckoutPopup);
 }
 
+// Auth form toggle
+if (showSignupBtn) {
+    showSignupBtn.addEventListener('click', () => {
+        checkoutLoginForm.classList.add('hidden');
+        checkoutSignupForm.classList.remove('hidden');
+    });
+}
+
+if (showLoginBtn) {
+    showLoginBtn.addEventListener('click', () => {
+        checkoutSignupForm.classList.add('hidden');
+        checkoutLoginForm.classList.remove('hidden');
+    });
+}
+
+// Login handler
+if (authLoginBtn) {
+    authLoginBtn.addEventListener('click', async () => {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        const errorEl = document.getElementById('authError');
+
+        if (!email || !password) {
+            errorEl.textContent = 'Veuillez remplir tous les champs';
+            return;
+        }
+
+        authLoginBtn.disabled = true;
+        authLoginBtn.textContent = 'Connexion...';
+
+        const { data, error } = await signInUser(email, password);
+
+        if (error) {
+            errorEl.textContent = error.message.includes('Invalid login')
+                ? 'Email ou mot de passe incorrect'
+                : error.message;
+            authLoginBtn.disabled = false;
+            authLoginBtn.textContent = 'Se connecter';
+            return;
+        }
+
+        // Login successful
+        currentUser = data.user;
+        isAuthenticated = true;
+        localStorage.setItem('oslan_token', 'true');
+
+        // Pre-fill email and load profile
+        const emailInput = document.getElementById('checkoutEmail');
+        if (emailInput && currentUser.email) {
+            emailInput.value = currentUser.email;
+        }
+        await loadUserProfile();
+
+        // Move to step 1
+        currentStep = 1;
+        updateStepUI();
+
+        authLoginBtn.disabled = false;
+        authLoginBtn.textContent = 'Se connecter';
+        errorEl.textContent = '';
+    });
+}
+
+// Signup handler
+if (authSignupBtn) {
+    authSignupBtn.addEventListener('click', async () => {
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+        const errorEl = document.getElementById('signupError');
+
+        if (!email || !password || !passwordConfirm) {
+            errorEl.textContent = 'Veuillez remplir tous les champs';
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            errorEl.textContent = 'Les mots de passe ne correspondent pas';
+            return;
+        }
+
+        if (password.length < 6) {
+            errorEl.textContent = 'Le mot de passe doit contenir au moins 6 caractères';
+            return;
+        }
+
+        authSignupBtn.disabled = true;
+        authSignupBtn.textContent = 'Création...';
+
+        const { data, error } = await signUpUser(email, password);
+
+        if (error) {
+            errorEl.textContent = error.message;
+            authSignupBtn.disabled = false;
+            authSignupBtn.textContent = 'Créer mon compte';
+            return;
+        }
+
+        // Signup successful
+        if (data.user) {
+            currentUser = data.user;
+            isAuthenticated = true;
+            localStorage.setItem('oslan_token', 'true');
+
+            // Pre-fill email
+            const emailInput = document.getElementById('checkoutEmail');
+            if (emailInput && currentUser.email) {
+                emailInput.value = currentUser.email;
+            }
+
+            // Move to step 1
+            currentStep = 1;
+            updateStepUI();
+        } else {
+            // Email confirmation required
+            errorEl.textContent = 'Vérifiez votre email pour confirmer votre compte';
+            errorEl.style.color = '#4caf50';
+        }
+
+        authSignupBtn.disabled = false;
+        authSignupBtn.textContent = 'Créer mon compte';
+    });
+}
+
 // Step navigation
 function updateStepUI() {
+    // Show/hide login step
+    if (currentStep === 0) {
+        // On login step
+        checkoutStepsIndicator.classList.add('hidden');
+        checkoutPopupTitle.textContent = 'Connexion requise';
+        checkoutStepLogin.classList.add('active');
+        document.getElementById('checkoutStep1').classList.remove('active');
+        document.getElementById('checkoutStep2').classList.remove('active');
+        document.getElementById('checkoutStep3').classList.remove('active');
+        checkoutPrevBtn.classList.add('hidden');
+        checkoutNextBtn.classList.add('hidden');
+        checkoutConfirmBtn.classList.add('hidden');
+        return;
+    }
+
+    // Show steps indicator for checkout steps
+    checkoutStepsIndicator.classList.remove('hidden');
+    checkoutPopupTitle.textContent = 'Finaliser la commande';
+    checkoutStepLogin.classList.remove('active');
+
     // Update step indicators
     checkoutSteps.forEach((step, index) => {
         const stepNum = index + 1;
@@ -325,10 +555,9 @@ function updateStepUI() {
     });
 
     // Update step contents
-    checkoutStepContents.forEach((content, index) => {
-        const stepNum = index + 1;
-        content.classList.toggle('active', stepNum === currentStep);
-    });
+    document.getElementById('checkoutStep1').classList.toggle('active', currentStep === 1);
+    document.getElementById('checkoutStep2').classList.toggle('active', currentStep === 2);
+    document.getElementById('checkoutStep3').classList.toggle('active', currentStep === 3);
 
     // Update navigation buttons
     checkoutPrevBtn.classList.toggle('hidden', currentStep === 1);
@@ -519,6 +748,11 @@ if (checkoutConfirmBtn) {
             country: document.getElementById('checkoutCountry').value.trim(),
             paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card'
         };
+
+        // Save profile for future use
+        if (isAuthenticated) {
+            await saveUserProfile(customerInfo);
+        }
 
         if (window.oslanAnalytics) {
             const success = await window.oslanAnalytics.createOrder(cart, customerInfo);
