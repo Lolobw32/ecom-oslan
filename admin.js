@@ -501,7 +501,14 @@ async function editProduct(productId) {
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productStock').value = product.stock_quantity;
+        document.getElementById('productStock').value = product.stock_quantity;
         document.getElementById('productImage').value = product.image_url || '';
+        // Clear file input
+        document.getElementById('productImageFile').value = '';
+        // Show preview
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = product.image_url ? `<img src="${product.image_url}" style="width:100%; border-radius:4px;">` : '';
+
         document.getElementById('productCategory').value = product.category || '';
 
         ensurePreorderField();
@@ -526,18 +533,48 @@ async function saveProduct() {
     const client = getSupabaseClient();
     if (!client) return;
 
+    // Handle Image Upload
+    const fileInput = document.getElementById('productImageFile');
+    let imageUrl = document.getElementById('productImage').value; // Default to existing/hidden
+
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        try {
+            // Check if bucket exists/public is manual step for user
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            // Upload
+            const { error: uploadError } = await client.storage
+                .from('product-images') // User MUST create this
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            // Get Public URL
+            const { data } = client.storage
+                .from('product-images')
+                .getPublicUrl(filePath);
+
+            imageUrl = data.publicUrl;
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Erreur lors de l\'upload de l\'image. Vérifiez que le bucket "product-images" existe et est public.');
+            return; // Stop save
+        }
+    }
+
     const productData = {
         title: document.getElementById('productTitle').value,
         description: document.getElementById('productDescription').value,
         price: parseFloat(document.getElementById('productPrice').value),
         stock_quantity: parseInt(document.getElementById('productStock').value),
-        image_url: document.getElementById('productImage').value,
+        image_url: imageUrl, // Use the uploaded or existing URL
         category: document.getElementById('productCategory').value,
         // Safe check for preorder field
         is_preorder: document.getElementById('productPreorder') ? document.getElementById('productPreorder').checked : false,
-        // Active status (Default true for new, checkbox for edit if we add it, or keep existing)
-        // For now we default to true on create. 
-        // We will add an 'isActive' checkbox to the modal to allow "Suspending"
+        // Active status
         is_active: document.getElementById('productActive') ? document.getElementById('productActive').checked : true
     };
 
@@ -653,7 +690,13 @@ function renderOrdersTable(orders) {
 
     tbody.innerHTML = orders.map(order => {
         // Use detailed customer info if available in shipping_address (JSONB)
-        const shipping = order.shipping_address || {};
+        let shipping = order.shipping_address || {};
+
+        // Handle case where shipping_address is stringified JSON
+        if (typeof shipping === 'string') {
+            try { shipping = JSON.parse(shipping); } catch (e) { }
+        }
+
         const customerName = shipping.firstName && shipping.lastName
             ? `${shipping.firstName} ${shipping.lastName}`
             : (order.profiles
@@ -665,12 +708,15 @@ function renderOrdersTable(orders) {
                 <td><code>${order.id.substring(0, 8)}</code></td>
                 <td>
                     <div style="font-weight:600">${customerName}</div>
-                    <div style="font-size:11px; color:#666">${shipping.city || ''}</div>
+                    <div style="font-size:11px; color:#666">
+                         ${shipping.address ? `${shipping.address}, ${shipping.city}` : 'Adresse non disp.'}
+                    </div>
                 </td>
                 <td>${new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
                 <td>
                     <select class="status-select status-${order.status}" 
-                            onchange="updateOrderStatus('${order.id}', this.value)">
+                            onchange="updateOrderStatus('${order.id}', this.value)"
+                            onclick="event.stopPropagation()"> <!-- Prevent row click if we add row click later -->
                         <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>En attente</option>
                         <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>En cours</option>
                         <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Expédiée</option>

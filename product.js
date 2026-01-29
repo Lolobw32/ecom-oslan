@@ -127,6 +127,9 @@ if (document.body.classList.contains('product-detail-page')) {
                 addToCartBtn.classList.remove('preorder-btn');
                 const badge = document.querySelector('.preorder-badge');
                 if (badge) badge.remove();
+
+                // Also disable Buy Now button
+                if (buyNowBtn) buyNowBtn.disabled = true;
             }
         }
     }

@@ -275,8 +275,11 @@
                     </div>
                 </div>
                 <div class="admin-form-group">
-                    <label for="productImage">URL Image</label>
-                    <input type="text" id="productImage">
+                    <label for="productImageFile">Image du produit</label>
+                    <input type="file" id="productImageFile" accept="image/*">
+                    <input type="hidden" id="productImage"> <!-- Stores the URL after upload -->
+                    <small style="color:#666; font-size:12px">Laissez vide pour conserver l'image actuelle.</small>
+                    <div id="imagePreview" style="margin-top:10px; max-width:100px;"></div>
                 </div>
                 <div class="admin-form-group">
                     <label for="productCategory">Catégorie</label>
