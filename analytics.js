@@ -99,7 +99,8 @@ async function createOrder(cartItems, customerInfo) {
                 orderItemsData.push({
                     product_id: dbProduct.id,
                     quantity: item.quantity,
-                    price_at_purchase: dbProduct.price
+                    price_at_purchase: dbProduct.price,
+                    size: item.size || 'M' // Save size
                 });
             } else {
                 console.warn(`Product not found for checkout: ${item.productId}`);

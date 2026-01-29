@@ -1,32 +1,9 @@
 // ===== Cart Page Script =====
 
 // ===== Product Data (same as product.js) =====
-const productData = {
-    'tshirt-blanc': {
-        title: 'T-shirt Signature Oslan Blanc',
-        price: 45,
-        originalPrice: 55,
-        image: 'assets/tshirt-blanc.jpg'
-    },
-    'tshirt-noir-femme': {
-        title: 'T-shirt Signature Oslan Noir',
-        price: 45,
-        originalPrice: 55,
-        image: 'assets/tshirt-noir-femme.jpg'
-    },
-    'tshirt-noir-homme': {
-        title: 'T-shirt Signature Oslan Noir',
-        price: 45,
-        originalPrice: 55,
-        image: 'assets/tshirt-noir-homme.jpg'
-    },
-    'tshirt-blanc-femme': {
-        title: 'T-shirt Signature Oslan Blanc',
-        price: 45,
-        originalPrice: 55,
-        image: 'assets/tshirt-blanc-femme.jpg'
-    }
-};
+// ===== Product Data =====
+// No static data needed, we use data stored in cart or fetch real-time
+// const productData = { ... };
 
 // ===== Cart Storage Functions =====
 function safeJSONParse(str, fallback) {
@@ -111,21 +88,21 @@ function renderCart() {
     checkoutSection.style.display = 'block';
 
     cartItemsContainer.innerHTML = cart.map((item, index) => {
-        const product = productData[item.productId] || {
-            title: 'Produit inconnu',
-            price: 0,
-            image: 'assets/logo.png'
-        };
+        // Use stored item data, or fallback
+        const title = item.title || 'Produit sans nom';
+        const price = item.price || 0;
+        const image = item.image || 'assets/logo.png';
+        const size = item.size || 'M';
 
         return `
             <div class="cart-item" data-index="${index}">
                 <div class="cart-item-image">
-                    <img src="${product.image}" alt="${product.title}" width="80" height="80" loading="lazy">
+                    <img src="${image}" alt="${title}" width="80" height="80" loading="lazy" style="object-fit:cover">
                 </div>
                 <div class="cart-item-details">
-                    <h3 class="cart-item-title">${product.title}</h3>
-                    <p class="cart-item-variant">Taille: ${item.size || 'M'}</p>
-                    <div class="cart-item-price">${product.price}€</div>
+                    <h3 class="cart-item-title">${title}</h3>
+                    <p class="cart-item-variant">Taille: ${size} ${item.isPreorder ? '<span style="color:#d97706; font-size:0.8em">(Précommande)</span>' : ''}</p>
+                    <div class="cart-item-price">${price.toFixed(2)}€</div>
                 </div>
                 <div class="cart-item-actions">
                     <div class="quantity-controls">
@@ -198,9 +175,8 @@ function updateTotals() {
     let subtotal = 0;
 
     cart.forEach(item => {
-        const product = productData[item.productId];
-        if (product) {
-            subtotal += product.price * item.quantity;
+        if (item.price) {
+            subtotal += item.price * item.quantity;
         }
     });
 

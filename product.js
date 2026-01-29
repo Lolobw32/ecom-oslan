@@ -72,13 +72,45 @@ if (document.body.classList.contains('product-detail-page')) {
                     id: dbProduct.id, // Important: Use Real UUID
                     stock_quantity: dbProduct.stock_quantity,
                     is_preorder: dbProduct.is_preorder,
-                    price: dbProduct.price // Sync price
-                    // We don't overwrite Title/Desc/Image to avoid "flicker" if DB is slightly different
+                    price: dbProduct.price, // Sync price
+                    images: dbProduct.images, // New array
+                    size_stock: dbProduct.size_stock // New JSON
                 };
 
                 // Update UI for Dynamic parts only
                 if (currentPrice) currentPrice.textContent = `${dbProduct.price.toFixed(2)}€`;
-                checkStock(dbProduct.stock_quantity, dbProduct.is_preorder);
+
+                // Handle Gallery
+                if (dbProduct.images && dbProduct.images.length > 0 && galleryTrack) {
+                    galleryTrack.innerHTML = dbProduct.images.map((url, index) => `
+                        <div class="gallery-slide" style="flex: 0 0 100%;">
+                            <img src="${url}" alt="${dbProduct.title} - Vue ${index + 1}" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                    `).join('');
+
+                    // Update Dots
+                    if (galleryDots) {
+                        galleryDots.innerHTML = dbProduct.images.map((_, index) => `
+                            <div class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>
+                        `).join('');
+
+                        // Re-attach listeners
+                        galleryDots.querySelectorAll('.dot').forEach(dot => {
+                            dot.addEventListener('click', () => {
+                                currentSlide = parseInt(dot.dataset.index);
+                                updateGallery();
+                            });
+                        });
+                    }
+                    // Reset slide
+                    currentSlide = 0;
+                    updateGallery(false);
+                }
+
+                // Handle Sizes
+                updateSizeAvailability(dbProduct.size_stock, dbProduct.is_preorder);
+
+                checkStock(dbProduct.stock_quantity, dbProduct.is_preorder); // Initial check (maybe based on default M)
 
                 // Subscribe to Realtime changes
                 subscribeToProductUpdates(dbProduct.id);
@@ -90,6 +122,59 @@ if (document.body.classList.contains('product-detail-page')) {
 
         } catch (err) {
             console.error('Error fetching product:', err);
+        }
+    }
+
+    // New Helper for Size UI
+    function updateSizeAvailability(sizeStock, isPreorder) {
+        if (!sizeOptions) return;
+
+        // If no strict size stock, assume legacy (all enabled)
+        if (!sizeStock || Object.keys(sizeStock).length === 0) return;
+
+        // Clear existing or Update existing?
+        // Let's iterate existing buttons and update state
+        const buttons = sizeOptions.querySelectorAll('.size-btn');
+        buttons.forEach(btn => {
+            const size = btn.dataset.size;
+            const stock = sizeStock[size];
+
+            // Logic:
+            // If size is NOT in sizeStock (undefined), implies not configured/avail? Or allowed?
+            // User checkbox logic: Unchecked = Disabled/Hidden.
+            // So if undefined or null, we might want to hide it.
+            // But if it's 0 and Preorder is FALSE => Disable.
+
+            if (stock === undefined) {
+                // Not configured in Admin -> Disable/Hide
+                btn.classList.add('disabled');
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+                // If it was selected, deselect
+                if (btn.classList.contains('active')) btn.classList.remove('active');
+            } else {
+                if (stock > 0 || isPreorder) {
+                    btn.classList.remove('disabled');
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                } else {
+                    // Out of stock and not preorder
+                    btn.classList.add('disabled');
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                    if (btn.classList.contains('active')) btn.classList.remove('active');
+                }
+            }
+        });
+
+        // Ensure at least one active if possible
+        if (!sizeOptions.querySelector('.size-btn.active')) {
+            const firstAvail = sizeOptions.querySelector('.size-btn:not(.disabled)');
+            if (firstAvail) firstAvail.click();
+            else {
+                // No sizes? Disable add to cart
+                checkStock(0, false);
+            }
         }
     }
 
@@ -153,11 +238,13 @@ if (document.body.classList.contains('product-detail-page')) {
                 currentProduct.stock_quantity = updatedProduct.stock_quantity;
                 currentProduct.is_preorder = updatedProduct.is_preorder;
                 currentProduct.price = updatedProduct.price;
+                currentProduct.size_stock = updatedProduct.size_stock;
 
                 // Update UI elements
                 if (currentPrice) currentPrice.textContent = `${updatedProduct.price.toFixed(2)}€`;
 
                 // Live Stock & Pre-order Update
+                updateSizeAvailability(updatedProduct.size_stock, updatedProduct.is_preorder);
                 checkStock(updatedProduct.stock_quantity, updatedProduct.is_preorder);
             })
             .subscribe();
@@ -247,7 +334,8 @@ if (document.body.classList.contains('product-detail-page')) {
                 cart.push({
                     productId: productToAddID, // Important: using DB ID
                     title: currentProduct.title, // Store title for cart display
-                    image: currentProduct.image_url,
+                    // Use first image if array
+                    image: (currentProduct.images && currentProduct.images.length > 0) ? currentProduct.images[0] : currentProduct.image_url,
                     price: currentProduct.price,
                     size: size,
                     quantity: 1,

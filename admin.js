@@ -502,12 +502,42 @@ async function editProduct(productId) {
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productStock').value = product.stock_quantity;
         document.getElementById('productStock').value = product.stock_quantity;
-        document.getElementById('productImage').value = product.image_url || '';
-        // Clear file input
-        document.getElementById('productImageFile').value = '';
-        // Show preview
-        const preview = document.getElementById('imagePreview');
-        preview.innerHTML = product.image_url ? `<img src="${product.image_url}" style="width:100%; border-radius:4px;">` : '';
+
+        // Handle Images Display
+        const preview = document.getElementById('imagePreviewContainer');
+        let images = [];
+        // Support both new 'images' array and old 'image_url' validation
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            images = product.images;
+        } else if (product.image_url) {
+            images = [product.image_url];
+        }
+        document.getElementById('existingImages').value = JSON.stringify(images);
+
+        if (preview) {
+            preview.innerHTML = images.map(url => `<img src="${url}" style="width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #ddd">`).join('');
+        }
+
+        // Handle Size Stock Populating
+        const sizeStock = product.size_stock || {};
+        document.querySelectorAll('.size-enable').forEach(cb => {
+            const size = cb.dataset.size;
+            if (sizeStock[size] !== undefined) {
+                cb.checked = true;
+                const input = document.querySelector(`.size-qty[data-size="${size}"]`);
+                if (input) {
+                    input.disabled = false;
+                    input.value = sizeStock[size];
+                }
+            } else {
+                cb.checked = false;
+                const input = document.querySelector(`.size-qty[data-size="${size}"]`);
+                if (input) {
+                    input.disabled = true;
+                    input.value = '';
+                }
+            }
+        });
 
         document.getElementById('productCategory').value = product.category || '';
 
@@ -533,48 +563,68 @@ async function saveProduct() {
     const client = getSupabaseClient();
     if (!client) return;
 
-    // Handle Image Upload
-    const fileInput = document.getElementById('productImageFile');
-    let imageUrl = document.getElementById('productImage').value; // Default to existing/hidden
+    // 1. Handle Images
+    const fileInput = document.getElementById('productImageFiles');
+    let finalImages = [];
 
+    // Recover existing images
+    try {
+        const existingStr = document.getElementById('existingImages').value;
+        if (existingStr) finalImages = JSON.parse(existingStr);
+    } catch (e) { console.log('Error parsing existing images', e); }
+
+    // Upload New Files
     if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        try {
-            // Check if bucket exists/public is manual step for user
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
+        for (let i = 0; i < fileInput.files.length; i++) {
+            const file = fileInput.files[i];
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${i}.${fileExt}`; // Unique name
+                const { error: uploadError } = await client.storage
+                    .from('product-images')
+                    .upload(fileName, file);
 
-            // Upload
-            const { error: uploadError } = await client.storage
-                .from('product-images') // User MUST create this
-                .upload(filePath, file);
+                if (uploadError) throw uploadError;
 
-            if (uploadError) throw uploadError;
-
-            // Get Public URL
-            const { data } = client.storage
-                .from('product-images')
-                .getPublicUrl(filePath);
-
-            imageUrl = data.publicUrl;
-        } catch (error) {
-            console.error('Upload error:', error);
-            alert('Erreur lors de l\'upload de l\'image. Vérifiez que le bucket "product-images" existe et est public.');
-            return; // Stop save
+                const { data } = client.storage.from('product-images').getPublicUrl(fileName);
+                finalImages.push(data.publicUrl);
+            } catch (error) {
+                console.error('Upload Error:', error);
+                alert('Erreur upload image: ' + error.message);
+            }
         }
     }
+
+    // 2. Handle Sizes & Stock Calculation
+    let sizeStock = {};
+    let totalStock = 0;
+
+    document.querySelectorAll('.size-enable:checked').forEach(cb => {
+        const size = cb.dataset.size;
+        const input = document.querySelector(`.size-qty[data-size="${size}"]`);
+        const qty = input ? (parseInt(input.value) || 0) : 0;
+        sizeStock[size] = qty;
+        totalStock += qty;
+    });
+
+    // Primary Image (First one)
+    const primaryImageUrl = finalImages.length > 0 ? finalImages[0] : '';
+
+    // If no sizes were handled (legacy or quick add), fallback to manual inputs if sizes are empty
+    // But we prefer the grid. If totalStock is 0 but user entered something in the old field?
+    // We hid the old field in Admin HTML (replaced it).
+    // So we rely on the grid result.
 
     const productData = {
         title: document.getElementById('productTitle').value,
         description: document.getElementById('productDescription').value,
         price: parseFloat(document.getElementById('productPrice').value),
-        stock_quantity: parseInt(document.getElementById('productStock').value),
-        image_url: imageUrl, // Use the uploaded or existing URL
+        stock_quantity: totalStock, // Calculated from sizes
+        size_stock: sizeStock,      // New JSONB field
+        images: finalImages,        // New JSONB field
+        image_url: primaryImageUrl, // Legacy compatibility
         category: document.getElementById('productCategory').value,
-        // Safe check for preorder field
         is_preorder: document.getElementById('productPreorder') ? document.getElementById('productPreorder').checked : false,
-        // Active status
         is_active: document.getElementById('productActive') ? document.getElementById('productActive').checked : true
     };
 
