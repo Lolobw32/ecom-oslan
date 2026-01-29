@@ -314,6 +314,9 @@ async function loadProducts() {
     }
 }
 
+
+
+
 function renderProductsTable(products) {
     const tbody = document.getElementById('productsTableBody');
     if (!tbody) return;
@@ -538,7 +541,14 @@ async function loadOrders() {
 
         const { data: orders, error } = await query;
 
-        if (error) throw error;
+        if (error) {
+            // Check for RLS Permission Denied
+            if (error.code === '42501') {
+                console.error('RLS Permission Denied:', error);
+                alert('Erreur de permissions : Vous n\'avez pas accès aux commandes. Vérifiez que votre compte Admin a les droits Supabase (RLS).');
+            }
+            throw error;
+        }
 
         renderOrdersTable(orders || []);
 

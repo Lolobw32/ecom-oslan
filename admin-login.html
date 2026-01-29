@@ -250,22 +250,44 @@
                     throw new Error('Erreur de connexion à la base de données');
                 }
 
-                // Vérifier les identifiants via la fonction Supabase
+                // Vérifier les identifiants via la fonction Supabase (Custom Check)
                 const { data, error } = await client.rpc('verify_admin_login', {
                     p_username: username,
                     p_password: password
                 });
 
-                if (error) {
-                    console.error('Supabase error:', error);
-                    throw new Error('Erreur lors de la vérification des identifiants');
+                // NOTE: If RPC fails or doesn't exist, we fallback to standard Auth login attempt
+                // This handles cases where verify_admin_login might be missing or we just want standard auth
+
+                let authSuccess = false;
+
+                if (data === true) {
+                    authSuccess = true;
                 }
 
-                if (!data) {
+                // CRITICAL: Always attempt real Supabase Auth login to get the Session Token for RLS
+                const { data: authData, error: authError } = await client.auth.signInWithPassword({
+                    email: username,
+                    password: password
+                });
+
+                if (authError) {
+                    console.warn('Supabase Auth Login failed:', authError.message);
+                    // If custom RPC passed but Auth failed, we might have a state mismatch.
+                    // But if RPC passed, we trust it for "Access" but RLS might fail.
+                    // We continue if RPC passed, but warn.
+                    if (!authSuccess) {
+                        throw new Error('Identifiant ou mot de passe incorrect');
+                    }
+                } else {
+                    authSuccess = true;
+                }
+
+                if (!authSuccess) {
                     throw new Error('Identifiant ou mot de passe incorrect');
                 }
 
-                // Success - créer une session admin
+                // Success - créer une session admin (Legacy/UI)
                 const adminSession = {
                     username: username,
                     loginTime: new Date().toISOString(),
@@ -273,7 +295,7 @@
                 };
 
                 localStorage.setItem('oslan_admin_session', JSON.stringify(adminSession));
-                localStorage.setItem('oslan_token', 'true');
+                localStorage.setItem('oslan_token', 'true'); // Keep for compatibility
 
                 // Redirect to admin dashboard
                 window.location.href = 'admin.html';

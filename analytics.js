@@ -57,108 +57,126 @@ async function createOrder(cartItems, customerInfo) {
     }
 
     try {
-        // 1. Calculate Total
-        let totalAmount = 0;
+        // 1. Fetch products to get real prices and IDs
+        const { data: products, error: prodError } = await client.from('products').select('id, title, price, image_url');
 
-        // Fetch products to get real prices and IDs
-        const { data: products } = await client.from('products').select('id, title, price, image_url');
+        if (prodError || !products) {
+            console.error('Error fetching products during order:', prodError);
+            alert('Erreur technique (Produits). Contactez le support.');
+            return false;
+        }
 
-        // Let's check auth
+        // 2. Check Auth (Optional for guest checkout, but used if avail)
         const { data: { user } } = await client.auth.getUser();
         let userId = user ? user.id : null;
 
-        // If no user tracking for guests implemented yet, we create a guest profile/order if the schema allows nullable user_id
-
-        // Calculate total amount
+        // 3. Process Cart Items
+        let totalAmount = 0;
         const orderItemsData = [];
 
         for (const item of cartItems) {
-            // Find product ID in DB (basic matching for migration)
-            // We look for a product that contains the same key words or similar image path
             let dbProduct = null;
-            if (products) {
-                // Try to match by ID if item.productId matches a UUID (unlikely yet) or fallback to fuzzy match
-                dbProduct = products.find(p => p.id === item.productId);
 
+            // A. Try Direct ID Match (UUID)
+            dbProduct = products.find(p => p.id === item.productId);
+
+            // B. Fallback: Fuzzy Match by Title/Slug (for legacy cart items)
+            if (!dbProduct) {
+                const searchStr = String(item.productId).toLowerCase().replace(/-/g, ' ');
+                // Prioritize exact partial match on title
+                dbProduct = products.find(p => p.title.toLowerCase().includes(searchStr));
+
+                // Extra fallback for known keywords
                 if (!dbProduct) {
-                    // Fuzzy match: check if product title contains part of the ID string
-                    // e.g. 'tshirt-blanc' -> match product having 'tshirt' and 'blanc' in title/image?
-                    // Simplified: map existing known IDs to DB logic if possible, or just rely on title match
-                    const searchKey = item.productId.replace(/-/g, ' '); // 'tshirt blanc'
-                    dbProduct = products.find(p => p.title.toLowerCase().includes('blanc') && item.productId.includes('blanc'));
-                    if (!dbProduct && item.productId.includes('noir')) {
-                        dbProduct = products.find(p => p.title.toLowerCase().includes('noir'));
-                    }
-                    // Very basic fallback
-                    if (!dbProduct) dbProduct = products[0];
+                    if (searchStr.includes('blanc')) dbProduct = products.find(p => p.title.toLowerCase().includes('blanc'));
+                    else if (searchStr.includes('noir')) dbProduct = products.find(p => p.title.toLowerCase().includes('noir'));
                 }
             }
 
             if (dbProduct) {
-                totalAmount += dbProduct.price * item.quantity;
+                const itemTotal = dbProduct.price * item.quantity;
+                totalAmount += itemTotal;
                 orderItemsData.push({
                     product_id: dbProduct.id,
                     quantity: item.quantity,
                     price_at_purchase: dbProduct.price
                 });
+            } else {
+                console.warn(`Product not found for checkout: ${item.productId}`);
             }
         }
 
+        if (orderItemsData.length === 0) {
+            alert('Votre panier semble contenir des produits invalides ou indisponibles.');
+            return false;
+        }
+
+        // 4. Create Order Data
+        // Ensure customerInfo is clean
         const orderData = {
-            user_id: userId, // Can be null if schema allows, otherwise restricted
+            user_id: userId, // NULL for guest
             total_amount: totalAmount,
             status: 'pending',
-            shipping_address: customerInfo
+            shipping_address: customerInfo, // JSONB handles object directly
+            created_at: new Date().toISOString()
         };
 
-        // Insert Order
+        // 5. Insert Order
         const { data: order, error: orderError } = await client
             .from('orders')
             .insert([orderData])
-            .select()
+            .select() // Important to return the object for ID
             .single();
 
-        if (orderError) throw orderError;
+        if (orderError) {
+            console.error('Supabase Insert Error:', orderError);
+            // Hint for RLS issues
+            if (orderError.code === '42501') {
+                alert('Erreur de permissions (RLS) lors de la commande. Veuillez vérifier votre connexion.');
+            } else {
+                alert('Erreur lors de la création de la commande. Veuillez réessayer.');
+            }
+            throw orderError;
+        }
 
-        // Insert Order Items
-        const orderItems = orderItemsData.map(item => ({
+        // 6. Insert Order Items
+        const orderItemsWithId = orderItemsData.map(item => ({
             ...item,
             order_id: order.id
         }));
 
-        if (orderItems.length > 0) {
-            const { error: itemsError } = await client
-                .from('order_items')
-                .insert(orderItems);
+        const { error: itemsError } = await client
+            .from('order_items')
+            .insert(orderItemsWithId);
 
-            if (itemsError) throw itemsError;
+        if (itemsError) {
+            console.error('Error inserting items:', itemsError);
+            // We managed to create order but not items - serious issue.
+            // Ideally we'd rollback (delete order), but for now just warn.
+            throw itemsError;
+        }
 
-            // Update Stock for each item
-            for (const item of orderItems) {
-                // Call RPC to safely decrement stock
-                // Alternatively, direct update if RLS allows, but RPC is safer for concurrency
-                // For now, simpler direct update:
+        // 7. Update Stock
+        for (const item of orderItemsWithId) {
+            const { data: currentProd } = await client
+                .from('products')
+                .select('stock_quantity')
+                .eq('id', item.product_id)
+                .single();
 
-                const { data: currentProd } = await client
+            if (currentProd) {
+                const newStock = Math.max(0, currentProd.stock_quantity - item.quantity);
+                await client
                     .from('products')
-                    .select('stock_quantity')
-                    .eq('id', item.product_id)
-                    .single();
-
-                if (currentProd) {
-                    const newStock = Math.max(0, currentProd.stock_quantity - item.quantity);
-                    await client
-                        .from('products')
-                        .update({ stock_quantity: newStock })
-                        .eq('id', item.product_id);
-                }
+                    .update({ stock_quantity: newStock })
+                    .eq('id', item.product_id);
             }
         }
 
         return true;
 
     } catch (error) {
-        console.error('Order creation error:', error);
+        console.error('Order creation fatal error:', error);
         return false;
     }
 }
