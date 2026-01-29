@@ -142,8 +142,20 @@ async function loadKPIs() {
             document.getElementById('kpiVisitors').textContent = uniqueVisitors;
         }
 
-        // Live visitors (mock for now - would use Realtime Presence)
-        document.getElementById('kpiLive').textContent = Math.floor(Math.random() * 10) + 1;
+        // Live visitors (Realtime Presence)
+        const channel = client.channel('room_visitors');
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                const newState = channel.presenceState();
+                const liveCount = Object.keys(newState).length;
+                document.getElementById('kpiLive').textContent = liveCount;
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    // Admin also joins but we might want to filter admins out in future
+                    // For now, it shows total connected clients including admin
+                }
+            });
 
     } catch (error) {
         console.error('Error loading KPIs:', error);
@@ -309,7 +321,7 @@ function renderProductsTable(products) {
     if (products.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
+                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
                     Aucun produit. Cliquez sur "Ajouter un produit" pour commencer.
                 </td>
             </tr>
@@ -334,6 +346,7 @@ function renderProductsTable(products) {
                 <span class="status-badge ${product.is_active ? 'active' : 'inactive'}">
                     ${product.is_active ? 'Actif' : 'Inactif'}
                 </span>
+                ${product.is_preorder ? '<span class="status-badge warning" style="margin-left:4px">Pré-commande</span>' : ''}
             </td>
             <td>
                 <div class="admin-table-actions">
@@ -367,6 +380,8 @@ function initProductModal() {
         currentEditingProduct = null;
         document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
         form.reset();
+        // Add pre-order checkbox dynamically if missing
+        ensurePreorderField();
         modal.classList.add('active');
     });
 
@@ -377,6 +392,31 @@ function initProductModal() {
         e.preventDefault();
         await saveProduct();
     });
+}
+
+function ensurePreorderField() {
+    // Check if preorder field exists in form, if not add it
+    let container = document.getElementById('preorderContainer');
+    if (!container) {
+        const form = document.getElementById('productForm');
+        // Insert before submit buttons
+        const btnGroup = form.querySelector('.form-actions');
+
+        container = document.createElement('div');
+        container.id = 'preorderContainer';
+        container.className = 'form-group checkbox-group';
+        container.style.marginBottom = '20px';
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.gap = '10px';
+
+        container.innerHTML = `
+            <input type="checkbox" id="productPreorder" name="is_preorder" style="width:auto; margin:0;">
+            <label for="productPreorder" style="margin:0; font-weight:500;">Activer la Pré-commande</label>
+        `;
+
+        form.insertBefore(container, btnGroup);
+    }
 }
 
 async function editProduct(productId) {
@@ -401,6 +441,12 @@ async function editProduct(productId) {
         document.getElementById('productImage').value = product.image_url || '';
         document.getElementById('productCategory').value = product.category || '';
 
+        ensurePreorderField();
+        const preorderCheckbox = document.getElementById('productPreorder');
+        if (preorderCheckbox) {
+            preorderCheckbox.checked = !!product.is_preorder;
+        }
+
         document.getElementById('productModal').classList.add('active');
     } catch (error) {
         console.error('Error loading product:', error);
@@ -418,7 +464,9 @@ async function saveProduct() {
         price: parseFloat(document.getElementById('productPrice').value),
         stock_quantity: parseInt(document.getElementById('productStock').value),
         image_url: document.getElementById('productImage').value,
-        category: document.getElementById('productCategory').value
+        category: document.getElementById('productCategory').value,
+        // Safe check for preorder field
+        is_preorder: document.getElementById('productPreorder') ? document.getElementById('productPreorder').checked : false
     };
 
     try {
@@ -443,7 +491,7 @@ async function saveProduct() {
         loadProducts();
     } catch (error) {
         console.error('Error saving product:', error);
-        alert('Erreur lors de l\'enregistrement du produit');
+        alert('Erreur lors de l\'enregistrement du produit. Vérifiez que la colonne is_preorder existe.');
     }
 }
 
@@ -493,6 +541,17 @@ async function loadOrders() {
         if (error) throw error;
 
         renderOrdersTable(orders || []);
+
+        // Realtime Orders Update
+        const channel = client.channel('orders_realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+                // If new insert or update, reload list
+                loadOrders();
+                // Also update revenue
+                loadKPIs();
+            })
+            .subscribe();
+
     } catch (error) {
         console.error('Error loading orders:', error);
     }
@@ -514,17 +573,22 @@ function renderOrdersTable(orders) {
     }
 
     tbody.innerHTML = orders.map(order => {
-        const customerName = order.profiles
-            ? (order.profiles.first_name && order.profiles.last_name
-                ? `${order.profiles.first_name} ${order.profiles.last_name}`
-                : order.profiles.email)
-            : 'Client inconnu';
+        // Use detailed customer info if available in shipping_address (JSONB)
+        const shipping = order.shipping_address || {};
+        const customerName = shipping.firstName && shipping.lastName
+            ? `${shipping.firstName} ${shipping.lastName}`
+            : (order.profiles
+                ? `${order.profiles.first_name || ''} ${order.profiles.last_name || ''}`.trim() || order.profiles.email
+                : 'Client inconnu');
 
         return `
             <tr>
                 <td><code>${order.id.substring(0, 8)}</code></td>
-                <td>${customerName}</td>
-                <td>${new Date(order.created_at).toLocaleDateString('fr-FR')}</td>
+                <td>
+                    <div style="font-weight:600">${customerName}</div>
+                    <div style="font-size:11px; color:#666">${shipping.city || ''}</div>
+                </td>
+                <td>${new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
                 <td>
                     <select class="status-select status-${order.status}" 
                             onchange="updateOrderStatus('${order.id}', this.value)">
@@ -561,7 +625,8 @@ async function updateOrderStatus(orderId, newStatus) {
 
         if (error) throw error;
 
-        loadOrders();
+        // No need to reload manually if realtime is working, but safety first
+        // loadOrders(); 
     } catch (error) {
         console.error('Error updating order status:', error);
         alert('Erreur lors de la mise à jour du statut');
@@ -598,7 +663,7 @@ async function viewOrderDetails(orderId) {
         document.getElementById('orderModal').classList.add('active');
     } catch (error) {
         console.error('Error loading order details:', error);
-        alert('Erreur lors du chargement des détails');
+        alert('Erreur lors du chargement des détails: ' + error.message);
     }
 }
 
@@ -606,44 +671,76 @@ function renderOrderDetails(order, items) {
     const content = document.getElementById('orderDetailsContent');
     if (!content) return;
 
-    const customerName = order.profiles
-        ? (order.profiles.first_name && order.profiles.last_name
-            ? `${order.profiles.first_name} ${order.profiles.last_name}`
-            : order.profiles.email)
-        : 'Client inconnu';
+    const shipping = order.shipping_address || {};
+
+    // Parse address if it's stored as JSON string (legacy)
+    let shipAddr = shipping;
+    if (typeof shipping === 'string') {
+        try { shipAddr = JSON.parse(shipping); } catch (e) { }
+    }
+
+    const customerName = shipAddr.firstName
+        ? `${shipAddr.firstName} ${shipAddr.lastName}`
+        : (order.profiles
+            ? `${order.profiles.first_name || ''} ${order.profiles.last_name || ''}`
+            : 'Client inconnu');
+
+    const fullAddress = shipAddr.address
+        ? `${shipAddr.address}<br>${shipAddr.zip} ${shipAddr.city}<br>${shipAddr.country}`
+        : 'Adresse non renseignée';
+
+    const contactInfo = `
+        <div><strong>Email:</strong> ${shipAddr.email || order.profiles?.email || 'N/A'}</div>
+        <div><strong>Tél:</strong> ${shipAddr.phone || order.profiles?.phone || 'N/A'}</div>
+    `;
 
     content.innerHTML = `
-        <div class="order-details">
-            <div class="order-detail-section">
-                <h4>Informations</h4>
-                <p><strong>ID:</strong> ${order.id}</p>
-                <p><strong>Client:</strong> ${customerName}</p>
-                <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString('fr-FR')}</p>
-                <p><strong>Statut:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
-            </div>
-
-            <div class="order-detail-section">
-                <h4>Produits</h4>
-                <div class="order-items-list">
-                    ${items.map(item => `
-                        <div class="order-item-detail">
-                            <img src="${item.products?.image_url || 'assets/logo.png'}" alt="${item.products?.title || 'Produit'}">
-                            <div class="order-item-info">
-                                <p><strong>${item.products?.title || 'Produit inconnu'}</strong></p>
-                                <p>Quantité: ${item.quantity} × ${parseFloat(item.price_at_purchase).toFixed(2)} €</p>
-                            </div>
-                            <div class="order-item-total">
-                                ${(item.quantity * parseFloat(item.price_at_purchase)).toFixed(2)} €
-                            </div>
-                        </div>
-                    `).join('')}
+        <div class="order-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="order-detail-card" style="background:var(--color-bg); padding:15px; border-radius:12px; border:1px solid #eee;">
+                <h4 style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">Client & Contact</h4>
+                <div style="font-size:14px;">
+                    <p style="font-size:16px; font-weight:600; margin-bottom:5px;">${customerName}</p>
+                    ${contactInfo}
                 </div>
             </div>
 
-            <div class="order-detail-section">
-                <h4>Total</h4>
-                <p class="order-total-amount">${parseFloat(order.total_amount).toFixed(2)} €</p>
+            <div class="order-detail-card" style="background:var(--color-bg); padding:15px; border-radius:12px; border:1px solid #eee;">
+                <h4 style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">Livraison</h4>
+                <div style="font-size:14px; line-height:1.5;">
+                    ${fullAddress}
+                </div>
+                <div style="margin-top:10px; font-size:12px; color:#666;">
+                    Mode de paiement: <strong>${shipAddr.paymentMethod === 'paypal' ? 'PayPal' : 'Carte Bancaire'}</strong>
+                </div>
             </div>
+        </div>
+
+        <div class="order-products-section">
+            <h4 style="margin-bottom:15px;">Produits commandés (${items.length})</h4>
+            <div class="order-items-list">
+                ${items.map(item => `
+                    <div class="order-item-detail" 
+                         style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #f0f0f0;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${item.products?.image_url || 'assets/logo.png'}" 
+                                 alt="${item.products?.title || 'Produit'}"
+                                 style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#f5f5f5;">
+                            <div>
+                                <p style="font-weight:600; margin-bottom:2px;">${item.products?.title || 'Produit inconnu'}</p>
+                                <p style="font-size:12px; color:#666;">Qté: ${item.quantity} × ${parseFloat(item.price_at_purchase).toFixed(2)} €</p>
+                            </div>
+                        </div>
+                        <div style="font-weight:600;">
+                            ${(item.quantity * parseFloat(item.price_at_purchase)).toFixed(2)} €
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="order-total-section" style="margin-top:20px; text-align:right; font-size:18px;">
+            <span>Total Commande: </span>
+            <span style="font-weight:700;">${parseFloat(order.total_amount).toFixed(2)} €</span>
         </div>
     `;
 }

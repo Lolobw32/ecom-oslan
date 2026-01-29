@@ -99,36 +99,53 @@ if (document.body.classList.contains('product-detail-page')) {
             // For now keeping existing secondary images logic if avail or using main
         }
 
-        // ===== STOCK MANAGEMENT =====
-        checkStock(product.stock_quantity);
+        // ===== STOCK MANAGEMENT & PRE-ORDER =====
+        checkStock(product.stock_quantity, product.is_preorder);
     }
 
-    function checkStock(quantity) {
+    function checkStock(quantity, isPreorder) {
         const isOutOfStock = quantity <= 0;
 
-        if (isOutOfStock) {
-            // Disable buttons
-            if (addToCartBtn) {
-                addToCartBtn.disabled = true;
-                addToCartBtn.textContent = 'Rupture de stock';
-                addToCartBtn.style.backgroundColor = '#ccc';
-                addToCartBtn.style.cursor = 'not-allowed';
-            }
-            if (buyNowBtn) {
-                buyNowBtn.disabled = true;
-                buyNowBtn.style.display = 'none'; // Hide buy now
-            }
-        } else {
-            // Enable buttons
+        if (isPreorder) {
+            // Pre-order mode: Always enabled, distinct style
             if (addToCartBtn) {
                 addToCartBtn.disabled = false;
-                addToCartBtn.textContent = 'Ajouter au panier';
-                addToCartBtn.style.backgroundColor = '';
+                addToCartBtn.textContent = 'Pré-commander';
+                addToCartBtn.style.backgroundColor = '#d97706'; // Amber 600 for visibility
+                addToCartBtn.style.color = '#fff';
                 addToCartBtn.style.cursor = 'pointer';
             }
             if (buyNowBtn) {
                 buyNowBtn.disabled = false;
                 buyNowBtn.style.display = 'inline-block';
+                buyNowBtn.textContent = 'Pré-commander maintenant';
+            }
+        } else if (isOutOfStock) {
+            // Out of stock mode
+            if (addToCartBtn) {
+                addToCartBtn.disabled = true;
+                addToCartBtn.textContent = 'Rupture de stock';
+                addToCartBtn.style.backgroundColor = '#ccc';
+                addToCartBtn.style.color = '#666';
+                addToCartBtn.style.cursor = 'not-allowed';
+            }
+            if (buyNowBtn) {
+                buyNowBtn.disabled = true;
+                buyNowBtn.style.display = 'none';
+            }
+        } else {
+            // Normal stock mode
+            if (addToCartBtn) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.textContent = 'Ajouter au panier';
+                addToCartBtn.style.backgroundColor = ''; // Reset to CSS default
+                addToCartBtn.style.color = '';
+                addToCartBtn.style.cursor = 'pointer';
+            }
+            if (buyNowBtn) {
+                buyNowBtn.disabled = false;
+                buyNowBtn.style.display = 'inline-block';
+                buyNowBtn.textContent = 'Acheter maintenant';
             }
 
             // Low stock warning (optional)
@@ -158,8 +175,8 @@ if (document.body.classList.contains('product-detail-page')) {
                 descriptionText.textContent = updatedProduct.description;
                 currentPrice.textContent = `${updatedProduct.price.toFixed(2)}€`;
 
-                // Live Stock Update
-                checkStock(updatedProduct.stock_quantity);
+                // Live Stock & Pre-order Update
+                checkStock(updatedProduct.stock_quantity, updatedProduct.is_preorder);
             })
             .subscribe();
     }
